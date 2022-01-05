@@ -14,6 +14,8 @@ namespace Player.Action
     //二、协程移动
     //这部分与其他action基本相同，只不过不需要actiontrigger
     //此外，协程移动不仅可以被actioncontroller调用，还可以被其他playeraction调用
+    //注意当其它playeraction被终止时即使他们正在使用协程移动，也不会调用LocomotionController的interrupt
+    //所以外包的协程移动不应该依赖于该脚本内的变量状态，应当是完全独立的一个函数体（协程）
 
     public class LocomotionController : PlayerAction
     {
@@ -24,7 +26,6 @@ namespace Player.Action
         private ActionController actionController;
         private Coroutine currentMove;
         private float defaultStopDistance;
-        [HideInInspector]public bool lockState;
 
         public override string actionName
         {
@@ -46,7 +47,6 @@ namespace Player.Action
         }
         void FixedUpdate()
         {
-            if(lockState) return;
             Vector3 viewEulerAngle = viewController.thirdPersonCam.transform.eulerAngles;
             Vector3 viewDirForward = viewController.thirdPersonCam.transform.forward;
             Vector3 viewDirRight = viewController.thirdPersonCam.transform.right;
@@ -77,16 +77,18 @@ namespace Player.Action
             moveDir.y = 0;
             moveDir.Normalize();
             transform.position += moveDir * Time.deltaTime * runSpeed;
-
+            
             if(moveDir != Vector3.zero)
             {
                 animator.SetInteger("MoveState", 1);
+                //正处于协程移动时进行自由移动，终止协程移动
                 if(currentMove != null)
                 {
                     StopCoroutine(currentMove);
                     currentMove = null;
                 }
             }
+            //没有任何移动键被按下，也不处于协程移动，退出
             else if(currentMove == null)
             {
                 animator.SetInteger("MoveState", 0);

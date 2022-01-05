@@ -62,11 +62,12 @@ public class ABManager : ManagerSingleton<ABManager>
     {
         if(mainAB == null)
         {
-            AssetBundleCreateRequest abcr = AssetBundle.LoadFromFileAsync(ABPath + "/" + bundleName);
+            AssetBundleCreateRequest abcr = AssetBundle.LoadFromFileAsync(ABPath + "/" + MainName);
             yield return abcr;
             mainAB = abcr.assetBundle;
             AssetBundleRequest abr = mainAB.LoadAssetAsync<AssetBundleManifest>("AssetBundleManifest");
             yield return abr;
+            manifest = abr.asset as AssetBundleManifest;
         }
         string[] dps = manifest.GetAllDependencies(bundleName);
         foreach (var dp in dps)
@@ -97,6 +98,7 @@ public class ABManager : ManagerSingleton<ABManager>
             abLoadedDic[bundleName] = abcr.assetBundle;
         }
     }
+    //加载资源
     public Object LoadAsset(string bundleName, string assetName)
     {
         #if UNITY_EDITOR
@@ -172,6 +174,7 @@ public class ABManager : ManagerSingleton<ABManager>
         yield return abr;
         loadOverCallback(abr.asset as T);
     }
+    //卸载ab包
     public void UnLoadAB(string abName)
     {
         if(abLoadedDic.ContainsKey(abName))
@@ -180,10 +183,15 @@ public class ABManager : ManagerSingleton<ABManager>
             abLoadedDic.Remove(abName);
         }
     }
+    //清空ab包缓存
     public void Clear()
     {
         mainAB = null;
         manifest = null;
+        foreach (var pack in abLoadedDic.Values)
+        {
+            pack.Unload(false);
+        }
         abLoadedDic.Clear();
     }
 

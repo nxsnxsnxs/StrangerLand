@@ -142,7 +142,13 @@ namespace Player.Action
             if(current != null)
             {
                 StopCoroutine(current);
-                if(animator.GetCurrentAnimatorStateInfo(0).IsName("Craft")) animator.SetTrigger("StopCraft");
+                //不能直接使用substate名字
+                if(animator.GetCurrentAnimatorStateInfo(0).IsName("Pickup") || 
+                animator.GetCurrentAnimatorStateInfo(0).IsName("Work") || 
+                animator.GetCurrentAnimatorStateInfo(0).IsName("Harvest_Begin") || 
+                animator.GetCurrentAnimatorStateInfo(0).IsName("Harvesting") || 
+                animator.GetCurrentAnimatorStateInfo(0).IsName("Harvest_End"))
+                    animator.SetTrigger("StopCraft");
                 if(inventoryController.handEquipment) inventoryController.handEquipment.gameObject.SetActive(true);
                 ResetActionTrigger();
             }

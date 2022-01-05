@@ -112,9 +112,7 @@ namespace Player.Action
                 attackTarget = closestTarget;
             } 
         }
-        /// <summary>
-        /// 开始一次Chase
-        /// </summary>
+        // 开始一次Chase
         public IEnumerator MoveToEnemy()
         {
             attackTargetLastPos = attackTarget.GetComponent<Collider>().ClosestPointOnBounds(viewController.model.transform.position);

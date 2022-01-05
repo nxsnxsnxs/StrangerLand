@@ -21,7 +21,6 @@ namespace UI
             float delta = (alpha - canvasGroup.alpha) / duration;
             while(duration > 0)
             {
-                Debug.Log(canvasGroup.alpha);
                 canvasGroup.alpha += delta * Time.deltaTime;
                 duration -= Time.deltaTime;
                 yield return null;

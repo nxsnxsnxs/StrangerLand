@@ -58,7 +58,7 @@ namespace Player.Action
         //优先级  higher number means higher priority
         public abstract int priority{ get; }
         //动作顺利完成的标志
-        public bool finish;
+        [HideInInspector]public bool finish;
         //actiontrigger注册表
         public Dictionary<string, ActionTrigger> triggers = new Dictionary<string, ActionTrigger>();
         //动作启动函数
@@ -133,7 +133,7 @@ namespace Player.Action
         {
             if(triggerName == null || !currentAction || currentAction.finish || !currentAction.triggers.ContainsKey(triggerName))
             {
-                Debug.LogError("action trigger set error");
+                Debug.LogError("action trigger set error" + triggerName + " " + currentAction);
                 return;
             }
             currentAction.triggers[triggerName].Set();
