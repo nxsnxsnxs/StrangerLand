@@ -1,4 +1,4 @@
-namespace Components
+namespace Player.Construction
 {
     using System.Collections;
     using System.Collections.Generic;
@@ -6,22 +6,6 @@ namespace Components
     using UnityEngine.Events;
     using Player.Action;
 
-    //json数据存储
-    public struct BuildingStats
-    {
-        //xz单位为网格
-        public byte length;//x
-        public byte width;//z
-        public float height;//y
-    }
-    /// <summary>
-    /// 记录一个建筑物存储的和运行时的所有信息
-    /// </summary>
-    public struct BuildingInfo
-    {
-        public GridPos center;
-        public BuildingStats stats;
-    }
     public class Constructable : MonoBehaviour
     {
         public UnityAction<bool> preBuildFinishCallback;//完成后的回调事件
@@ -32,6 +16,7 @@ namespace Components
         public Camera viewCam;
         private List<Material> originalMats;//建筑物原本的mat
         private List<Collider> collidersInTrigger;//检测到碰撞的物体（用于确定是否可以放置)
+        private bool inPrebuild;
         public GameObject building;
 
         void Init()
@@ -43,6 +28,7 @@ namespace Components
             {
                 originalMats.Add(mr.material);
             }
+            inPrebuild = true;
         }
         void Awake()
         {
@@ -64,26 +50,31 @@ namespace Components
 
         void FixedUpdate()
         {
-            FollowMousePos();
-            //可以放置
-            if(collidersInTrigger.Count == 0) building.GetComponentInChildren<MeshRenderer>().material = constructionController.preBuildSuccessMat;
-            else building.GetComponentInChildren<MeshRenderer>().material = constructionController.preBuildFailMat;
-            if(Input.GetMouseButtonDown(0))
+            if(inPrebuild)
             {
-                if(collidersInTrigger.Count == 0)
+                FollowMousePos();
+                //可以放置
+                if(collidersInTrigger.Count == 0) building.GetComponentInChildren<MeshRenderer>().material = constructionController.preBuildSuccessMat;
+                else building.GetComponentInChildren<MeshRenderer>().material = constructionController.preBuildFailMat;
+                if(Input.GetMouseButtonDown(0))
                 {
-                    preBuildFinishCallback.Invoke(true);
-                }
-                else
-                {
-                    preBuildFinishCallback.Invoke(false);
-                    Destroy(gameObject);
+                    if(collidersInTrigger.Count == 0)
+                    {
+                        preBuildFinishCallback.Invoke(true);
+                        inPrebuild = false;
+                    }
+                    else
+                    {
+                        preBuildFinishCallback.Invoke(false);
+                        Destroy(gameObject);
+                    }
                 }
             }
         }
 
         void OnTriggerEnter(Collider other)
         {
+            if(!inPrebuild) return;
             //Debug.Log(other.name);
             if(!collidersInTrigger.Contains(other) &&
             other.gameObject.layer != LayerMask.NameToLayer("ground") &&
@@ -91,6 +82,7 @@ namespace Components
         }
         void OnTriggerExit(Collider other)
         {
+            if(!inPrebuild) return;
             collidersInTrigger.Remove(other);
         }
         /// <summary>
@@ -103,7 +95,7 @@ namespace Components
             LayerMask layerMask = 1 << LayerMask.NameToLayer("ground");
             if(Physics.Raycast(ray, out raycastHit, float.PositiveInfinity, layerMask.value))
             {
-                GridPos buildPos = GridPos.GetGridPos(raycastHit.point + Vector3.up * info.stats.height / 2);
+                GridPos buildPos = GridPos.GetGridPos(raycastHit.point + Vector3.up * info.stats.height);
                 transform.position = buildPos.Pos;                
             }
         }

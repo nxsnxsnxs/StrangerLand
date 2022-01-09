@@ -41,21 +41,21 @@ namespace Player
             {
                 if(raycastHit.collider.CompareTag("Evil") && raycastHit.collider.GetComponentInParent<Attackable>())
                 {
-                    if(Input.GetMouseButtonDown(0)) actionController.DoAction<AttackController>(raycastHit.collider.GetComponentInParent<Attackable>());
+                    if(Input.GetMouseButtonDown(0)) actionController.DoAction<AttackController>(true, raycastHit.collider.GetComponentInParent<Attackable>());
                 }
                 else if(raycastHit.collider.GetComponentInParent<Pickable>())
                 {
-                    if(Input.GetMouseButtonDown(0)) actionController.DoAction<CraftController>(raycastHit.collider.GetComponentInParent<Pickable>());
+                    if(Input.GetMouseButtonDown(0)) actionController.DoAction<CraftController>(true, raycastHit.collider.GetComponentInParent<Pickable>());
                 }
                 else if(raycastHit.collider.GetComponentInParent<Workable>())
                 {
-                    if(Input.GetMouseButtonDown(0)) actionController.DoAction<CraftController>(raycastHit.collider.GetComponentInParent<Workable>());
+                    if(Input.GetMouseButtonDown(0)) actionController.DoAction<CraftController>(true, raycastHit.collider.GetComponentInParent<Workable>());
                 }
                 else if(raycastHit.collider.CompareTag("Ground"))
                 {
                     if(Input.GetMouseButtonDown(0))
                     {
-                        actionController.DoAction<LocomotionController>(raycastHit.point);
+                        actionController.DoAction<LocomotionController>(true, raycastHit.point);
                     }
                 }                
                 //if(raycastHit.collider.CompareTag("Building"))
@@ -68,11 +68,10 @@ namespace Player
         }
         void KeyboardUpdate()
         {
-            if(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.W) ||
-            Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D)) actionController.DoAction<LocomotionController>();
-            else if(Input.GetKey(KeyCode.Space)) actionController.DoAction<CraftController>();
-            else if(Input.GetKey(KeyCode.F)) actionController.DoAction<AttackController>();
-            else if(Input.GetKeyDown(KeyCode.C)) actionController.DoAction<ConstructionController>();
+            if(Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.W) ||
+            Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.D)) actionController.DoAction<LocomotionController>(false);
+            else if(Input.GetKey(KeyCode.Space)) actionController.DoAction<CraftController>(false);
+            else if(Input.GetKey(KeyCode.F)) actionController.DoAction<AttackController>(false);
         }
     }
 }

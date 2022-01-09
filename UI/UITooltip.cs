@@ -13,11 +13,13 @@ namespace UI
 
         public void OnPointerEnter(PointerEventData eventData)
         {
+            StopAllCoroutines();
             StartCoroutine(Utils.FadeIn(tooltip, showAlpha, showDuration));
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
+            StopAllCoroutines();
             StartCoroutine(Utils.FadeOut(tooltip, 0, showDuration));
         }
     }

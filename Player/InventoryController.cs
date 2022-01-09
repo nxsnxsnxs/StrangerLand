@@ -272,7 +272,7 @@ namespace Player
                 Debug.LogError("no drop item");
                 return;
             } 
-            if(actionController.DoAction<DropController>(slot))
+            if(actionController.DoAction<DropController>(false, slot))
             {
                 if(handEquipment) handEquipment.gameObject.SetActive(false);
             }
@@ -312,7 +312,7 @@ namespace Player
                 Debug.LogError("no equipment to unequip");
                 return;
             } 
-            actionController.DoAction<UnEquipController>(slot);
+            actionController.DoAction<UnEquipController>(false, slot);
         }
         public void UnEquipItem(EquipmentSlot slot)
         {

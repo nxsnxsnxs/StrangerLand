@@ -104,13 +104,14 @@ namespace Player.Action
                 currentAction = null;
             } 
         }
-        public bool DoAction<T>(params object[] target) where T : PlayerAction //Coroutine action, int priority, UnityAction interruptCallback)
+        public bool DoAction<T>(bool interruptSame, params object[] target) where T : PlayerAction
         {
             T action = GetComponent<T>();
             if(currentAction != null)
             {
-                //相同动作不能打断，不同动作相同优先级或更高优先级可以打断
-                if(currentAction.actionName != action.actionName && currentAction.priority <= action.priority)
+                //相同动作看参数，不同动作相同优先级或更高优先级可以打断
+                if((currentAction.actionName != action.actionName && currentAction.priority <= action.priority)
+                || (currentAction.actionName == action.actionName && interruptSame))
                 {
                     currentAction.Interrupted();
                     Debug.Log("ActionInterrupted: " + currentAction.actionName + " by " + action.actionName);
