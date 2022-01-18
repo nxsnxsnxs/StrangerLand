@@ -4,12 +4,16 @@ using UnityEngine;
 using Tools;
 using Components;
 
-namespace Prefab
+namespace Prefabs
 {
-    public class Tree : MonoBehaviour
+    public class Tree : PrefabComponent
     {
-        
-        void Awake()
+        public override string loadPath
+        {
+            get => "Tree";
+        }
+
+        public override void DefaultInit()
         {
             Pickable pickable = gameObject.AddGameComponent<Pickable>();
             pickable.type = PickType.Harvest;
@@ -17,6 +21,11 @@ namespace Prefab
             workable.workable = true;
             workable.toolType = WorkToolType.Axe;
             Attackable attackable = gameObject.AddGameComponent<Attackable>();
+        }
+
+        void Awake()
+        {
+
         }
     }
 }

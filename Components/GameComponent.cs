@@ -19,5 +19,13 @@ namespace Components
         {
             active = false;
         }
+        public virtual void InitData(Dictionary<string, object> data)
+        {
+
+        }
+        public virtual void SaveData(Dictionary<string, object> data)
+        {
+
+        }
     }
 }

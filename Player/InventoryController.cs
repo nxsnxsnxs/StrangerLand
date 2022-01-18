@@ -1,31 +1,33 @@
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Tools;
-using Prefab;
+using Prefabs;
 using Components;
 using UI;
 using Player.UI;
 using Player.Action;
+using Newtonsoft.Json;
 
 namespace Player
 {
-    public class InventoryController : MonoBehaviour
+    public class InventoryController : MonoBehaviour, IArchiveSave
     {
         public RuntimeAnimatorController handAnim;
         private Animator animator;
         private ActionController actionController;
 
         //背包中每个格子实际对应的物品
-        [HideInInspector]public InventoryItem handEquipment
+        public InventoryItem handEquipment
         {
             get => equipments[handSlot];
         }
-        [HideInInspector]public InventoryItem bodyEquipment
+        public InventoryItem bodyEquipment
         {
             get => equipments[bodySlot];
         }
-        [HideInInspector]public InventoryItem headEquipment
+        public InventoryItem headEquipment
         {
             get => equipments[headSlot];
         }
@@ -41,7 +43,6 @@ namespace Player
         //UI Panel
         public Transform inventoryPanel;
         public Transform dragPanel;
-        public Transform inspectPanel;
         //装备栏对应的ui
         public EquipmentSlot handSlot
         {
@@ -59,6 +60,11 @@ namespace Player
         //物品栏和装备栏的父物体
         private Transform inventorySlotsContainer;
         private Transform equipmentSlotsContainer;
+        private class PersistentData
+        {
+            public List<int> itemData;
+            public List<int> equipmentData;
+        }
         
         void Awake()
         {
@@ -73,12 +79,12 @@ namespace Player
             {
                 inventoryItems[slot] = null;
             }
-            
+            //初始化装备栏
             equipmentSlots = new Dictionary<EquipSlotType, EquipmentSlot>();
             equipmentSlots[EquipSlotType.Hand] = equipmentSlotsContainer.Find("Hand Slot").GetComponent<EquipmentSlot>();
             equipmentSlots[EquipSlotType.Body] = equipmentSlotsContainer.Find("Body Slot").GetComponent<EquipmentSlot>();
             equipmentSlots[EquipSlotType.Head] = equipmentSlotsContainer.Find("Head Slot").GetComponent<EquipmentSlot>();
-            //初始化装备栏
+            
             equipments = new Dictionary<EquipmentSlot, InventoryItem>();
             equipments[handSlot] = null;
             equipments[bodySlot] = null;
@@ -90,6 +96,10 @@ namespace Player
             equipmentContainer[EquipSlotType.Head] = hand;
         }
         
+        void Start()
+        {
+            ArchiveManager.Instance.RegisterSave(GetInstanceID(), this);
+        }
         void FixedUpdate()
         {
             
@@ -329,6 +339,22 @@ namespace Player
             }
             ReplaceAnimator(handAnim);
             UpdateUI();
+        }
+
+        public string GetPersistentData()
+        {
+            PersistentData data = new PersistentData();
+
+            foreach (var item in inventoryItems.Values)
+            {
+                data.itemData.Add(item.GetComponent<PrefabComponent>().GetInstanceID());
+            }
+            foreach (var item in equipments.Values)
+            {
+                data.equipmentData.Add(item.GetComponent<PrefabComponent>().GetInstanceID());
+            }
+
+            return "";
         }
     }
 }

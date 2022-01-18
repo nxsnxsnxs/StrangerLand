@@ -11,6 +11,7 @@ namespace Components
     public class Pickable : GameComponent
     {
         public PickType type;
+
         public InventoryItem Pick()
         {
             return gameObject.GetComponent<InventoryItem>();

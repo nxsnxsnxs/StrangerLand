@@ -4,17 +4,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Tools;
+using Newtonsoft.Json;
 
-using Debug = UnityEngine.Debug;
-
-namespace Prefab
+namespace Prefabs
 {
     using Components;
-    public class Axe : MonoBehaviour
+    public class Axe : PrefabComponent
     {
         private AnimatorOverrideController axeAnimator;
         private Sprite inventoryIcon;
-        void Awake()
+
+        public override string loadPath
+        {
+            get => "Axe";
+        }
+
+        public override void DefaultInit()
         {
             axeAnimator = ABManager.Instance.LoadAsset<AnimatorOverrideController>("Axe", "AxeAnim");
             inventoryIcon = ABManager.Instance.LoadAsset<Sprite>("Axe", "InventoryIcon");
@@ -39,6 +44,19 @@ namespace Prefab
             Inspectable inspectable = gameObject.AddGameComponent<Inspectable>();
             inspectable.inspectStr = "nxsnb,nxsnb  nxsnxs";
             inspectable.rimLightMat = ABManager.Instance.LoadAsset<Material>("Material", Constants.default_rimLightMat_path);
+        }
+
+        void Awake()
+        {
+
+        }
+        void Save()
+        {
+            IArchiveSave[] components = GetComponents<IArchiveSave>();
+            foreach (var item in components)
+            {
+                JsonConvert.SerializeObject(item);
+            }
         }
     }
 }

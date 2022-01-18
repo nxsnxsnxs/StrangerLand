@@ -46,7 +46,7 @@ namespace Player.Construction
 
         void Awake()
         {
-            TextAsset textAsset = ABManager.Instance.LoadAsset<TextAsset>("SystemStats", "BuildingCatalogue.json");
+            TextAsset textAsset = ABManager.Instance.LoadAsset<TextAsset>("GameStats", "BuildingCatalogue.json");
             catalogue = JsonUtility.FromJson<BuildingCatalogue>(textAsset.text);
         }
     }

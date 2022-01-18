@@ -9,8 +9,6 @@ using Components;
 
 namespace Player.Action
 {
-    using Prefab;
-
     //ActionTrigger是动画帧事件与动作交互的唯一方式
     //动画帧通过调用ActionController的SetActionTrigger(name)来触发ActionTrigger
     //当前正在进行的动作会检测对应的trigger并进入到下一阶段（产生实质性的效果）

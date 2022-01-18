@@ -131,6 +131,7 @@ namespace Player.Action
             }
             finish = true;
             ResetActionTrigger();
+            
         }
         IEnumerator HarvestTimer(float timer)
         {

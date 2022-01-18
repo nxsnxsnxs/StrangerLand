@@ -53,47 +53,53 @@ namespace Player.Action
             Vector3 lastPos = transform.position;
             
             float forward = 0, right = 0;
+            bool keyboardInput = false;
             if(Input.GetKey(KeyCode.A))
             {
                 viewController.model.rotation = Quaternion.Euler(0, viewEulerAngle.y - 90, 0);
                 right -= 1;
+                keyboardInput = true;
             }
             if(Input.GetKey(KeyCode.D))
             {
                 viewController.model.rotation = Quaternion.Euler(0, viewEulerAngle.y + 90, 0);
                 right += 1;
+                keyboardInput = true;
             }
             if(Input.GetKey(KeyCode.W))
             {
                 viewController.model.rotation = Quaternion.Euler(0, viewEulerAngle.y, 0);
                 forward += 1;
+                keyboardInput = true;
             }            
             if(Input.GetKey(KeyCode.S))
             {
                 viewController.model.rotation = Quaternion.Euler(0, viewEulerAngle.y + 180, 0);
                 forward -= 1;
+                keyboardInput = true;
             }
             Vector3 moveDir = viewDirForward * forward + viewDirRight * right;
             moveDir.y = 0;
             moveDir.Normalize();
             transform.position += moveDir * Time.deltaTime * runSpeed;
-            
-            if(moveDir != Vector3.zero)
-            {
-                animator.SetInteger("MoveState", 1);
-                //正处于协程移动时进行自由移动，终止协程移动
-                if(currentMove != null)
-                {
-                    StopCoroutine(currentMove);
-                    currentMove = null;
-                }
-            }
             //没有任何移动键被按下，也不处于协程移动，退出
-            else if(currentMove == null)
+            if(!keyboardInput)
             {
-                animator.SetInteger("MoveState", 0);
-                finish = true;
+                if(currentMove == null)
+                {
+                    animator.SetInteger("MoveState", 0);
+                    finish = true;
+                }
+                return;
             }
+            //正处于协程移动时进行自由移动，终止协程移动
+            if(currentMove != null)
+            {
+                StopCoroutine(currentMove);
+                currentMove = null;
+            }
+            if(moveDir == Vector3.zero) return;
+            animator.SetInteger("MoveState", 1);
         }
 
         public IEnumerator MoveToPoint(Vector3 dst)
