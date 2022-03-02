@@ -6,7 +6,12 @@ namespace Components
 {
     public class Tool : GameComponent
     {
-        public WorkToolType toolType;
-        public AnimatorOverrideController toolAnimator;
+        //********need set************
+        public List<WorkToolType> toolTypes;
+        //****************************
+        public bool CanWork(Workable workable)
+        {
+            return toolTypes.Contains(workable.toolType);
+        }
     }
 }

@@ -19,11 +19,15 @@ public class ArchiveManager : ManagerSingleton<ArchiveManager>
 {
     [JsonProperty]
     public int archiveID;
-    //场景中各物体的数据（含prefabcomponent的物体）
+    //场景中基本物体的数据
+    private Dictionary<int, string> orgPrefabData;
+    //场景中动态生成的物体的数据(含prefabcomponent的物体)
     [JsonProperty]
-    private Dictionary<int, string> prefabData;
+    private List<string> initPrefabData;
+    //存档自身的配置数据
     [JsonProperty]
     private Dictionary<string, object> archiveData;
+    //其它数据
     private Dictionary<int, IArchiveSave> itemToSave;
     private string dataPath;
 
@@ -58,7 +62,7 @@ public class ArchiveManager : ManagerSingleton<ArchiveManager>
         foreach (var item in prefabs)
         {
             var itemData = item.GetPersistentData();
-            prefabData.Add(itemData.Key, itemData.Value);
+            initPrefabData.Add(itemData);
         }
 
         JsonSerializerSettings settings = new JsonSerializerSettings();

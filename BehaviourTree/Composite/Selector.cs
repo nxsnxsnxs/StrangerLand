@@ -7,7 +7,7 @@ namespace MyBehaviourTree
     public class Selector : Composite
     {
         public int runningChild;
-        public Selector(BehaviourTree bt, List<BehaviourTreeNode> children) : base(bt, children)
+        public Selector(List<BehaviourTreeNode> children) : base(children)
         {
             
         }

@@ -7,22 +7,17 @@ namespace MyBehaviourTree
     public class BehaviourTree
     {
         public BehaviourTreeNode root;
-        public GameObject go;
+        public GameObject gameObject;
         public float interval;
-        public string debugStr;
-        private float lastTick = 0;
         private float sleepTime = 0;
         private Dictionary<string, object> blackboard;
-        public BehaviourTree(GameObject _go, float _interval)
-        {
-            go = _go;
-            interval = _interval;
-            blackboard = new Dictionary<string, object>();
-        }
+        //debug
+        private string runningNode;
         public BehaviourTree(GameObject _go, BehaviourTreeNode _root, float _interval)
         {
-            go = _go;
             root = _root;
+            root.parent = null;
+            gameObject = _go;
             interval = _interval;
             blackboard = new Dictionary<string, object>();
         }
@@ -47,17 +42,11 @@ namespace MyBehaviourTree
                 sleepTime -= Time.deltaTime;
                 return;
             }
-            if(lastTick + interval > Time.time) return;
-            lastTick = Time.time;
             root.Tick();
             root.Step();
-            
-            Debug.Log(debugStr);
-            debugStr = "";
         }
         public void ForceTick()
         {
-            lastTick = Time.time;
             root.Tick();
             root.Step();
         }

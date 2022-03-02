@@ -10,10 +10,12 @@ namespace Components
     }
     public class Equipable : GameComponent
     {
+        //********need set************
         public AnimatorOverrideController overrideAnimator;
         public EquipSlotType equipSlotType;
         public Vector3 pos;
         public Quaternion rot;
+        //***************************
         public void Equip(Transform parent)
         {
             transform.SetParent(parent);

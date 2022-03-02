@@ -11,7 +11,7 @@ namespace Prefabs
         private Sprite inventoryIcon;
         private AnimatorOverrideController swordAnim;
 
-        public override string loadPath
+        public override string bundleName
         {
             get => "RookieSword";
         }
@@ -19,31 +19,29 @@ namespace Prefabs
         public override void DefaultInit()
         {
             inventoryIcon = ABManager.Instance.LoadAsset<Sprite>("RookieSword", "InventoryIcon");
-            swordAnim = ABManager.Instance.LoadAsset<AnimatorOverrideController>("RookieSword", "SwordAnim");
+            swordAnim = ABManager.Instance.LoadAsset<AnimatorOverrideController>("RookieSword", "OverrideAnim");
 
             Pickable pickable = gameObject.AddGameComponent<Pickable>();
             pickable.type = PickType.Pickup;
             InventoryItem inventoryItem = gameObject.AddGameComponent<InventoryItem>();
             inventoryItem.icon = inventoryIcon;
             FiniteUse finiteUse = gameObject.AddGameComponent<FiniteUse>();
-            finiteUse.maxDurability = 100;
-            finiteUse.durability = 100;
+            finiteUse.maxUse = 40;
+            finiteUse.currUse = 40;
             Equipable equipable = gameObject.AddGameComponent<Equipable>();
             equipable.overrideAnimator = swordAnim;
             equipable.equipSlotType = EquipSlotType.Hand;
             equipable.pos = Vector3.zero;
             equipable.rot = Quaternion.identity;
             Weapon weapon = gameObject.AddGameComponent<Weapon>();
-            weapon.damage = Constants.rookie_sword_damage;
-            weapon.attackDistance = Constants.sword_attack_distance;
-            weapon.attackDuration = Constants.sword_attack_duration;
+            Combat.Config conf = new Combat.Config();
+            conf.damage = Constants.rookie_sword_damage;
+            conf.attackDistance = Constants.sword_attack_distance;
+            conf.hitDistance = Constants.sword_hit_distance;
+            conf.attackDuration = Constants.sword_attack_duration;
+            weapon.combatConf = conf;
             Inspectable inspectable = gameObject.AddGameComponent<Inspectable>();
             inspectable.inspectStr = Constants.rookie_sword_inspect_str;
-        }
-
-        void Awake()
-        {
-
         }
     }
 }

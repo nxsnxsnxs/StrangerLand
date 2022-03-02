@@ -6,32 +6,30 @@ namespace MyBehaviourTree
 {
     public class Sequence : Composite
     {
-        private int runningChild = 0;
-        public Sequence(BehaviourTree bt, List<BehaviourTreeNode> children) : base(bt, children)
+        protected int runningChild = 0;
+        public Sequence(List<BehaviourTreeNode> children) : base(children)
         {
             
         }
         public override void Tick()
         {
-            int start = runningChild;
-            int i = 0;
-            while(i < children.Count)
+            int curr = runningChild;
+            while(curr < children.Count)
             {
-                int index = (start + i) % children.Count;
-                children[index].Tick();
-                if(children[index].status == NodeState.Running)
+                children[curr].Tick();
+                if(children[curr].status == NodeState.Running)
                 {
-                    runningChild = (start + i) % children.Count;
+                    runningChild = curr;
                     status = NodeState.Running;
                     return;
                 }
-                else if(children[index].status == NodeState.Failure)
+                else if(children[curr].status == NodeState.Failure)
                 {
                     runningChild = 0;
                     status = NodeState.Failure;
                     return;
                 }
-                ++i;
+                ++curr;
             }
             runningChild = 0;
             status = NodeState.Success;

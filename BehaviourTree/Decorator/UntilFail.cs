@@ -6,7 +6,7 @@ namespace MyBehaviourTree
 {
     public class UntilFail : Decorator
     {
-        public UntilFail(BehaviourTree tree, BehaviourTreeNode _child) : base(tree, _child)
+        public UntilFail(BehaviourTreeNode _child) : base(_child)
         {
 
         }

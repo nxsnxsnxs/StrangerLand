@@ -9,10 +9,8 @@ namespace Components
     [System.Serializable]
     public class InventoryItem : GameComponent
     {
+        //********need set************
         public Sprite icon;
-        public void PutInInventory()
-        {
-            
-        }
+        //***************************
     }
 }

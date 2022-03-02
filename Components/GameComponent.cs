@@ -6,7 +6,7 @@ namespace Components
 {
     public abstract class GameComponent : MonoBehaviour
     {
-        public bool Active
+        /*public bool Active
         {
             get => active;
         }
@@ -18,7 +18,7 @@ namespace Components
         public void SetInactive()
         {
             active = false;
-        }
+        }*/
         public virtual void InitData(Dictionary<string, object> data)
         {
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -45,47 +46,84 @@ public class GridPos
 }
 public class MapManager : ManagerSingleton<MapManager>
 {
-    bool[,] mapGridsState;
+    public bool debug;
+    public GameObject visualizedMapQuad;
+    bool[,] mapGridsState = new bool[40, 40];
     void Awake()
     {
         Application.targetFrameRate = 60;
-        mapGridsState = new bool[121, 121];
     }
     void Start()
     {
         
     }
-    public List<Vector3> FindPath(Vector3 start, Vector3 end)
+    public List<Vector3> FindPath(Vector3 start, GameObject target, float coverRadius)
     {
-        return PathFinder.FindPath(mapGridsState, start, end);
+        if(!target.GetComponentInChildren<Collider>()) return FindPath(start, target.transform.position, coverRadius);
+        return PathFinder.FindPath(mapGridsState, start, target.GetComponentInChildren<Collider>(), coverRadius) ?? new List<Vector3>{start, target.transform.position};
     }
-    public void AddBuilding(BuildingInfo info)
+    public List<Vector3> FindPath(Vector3 start, Vector3 end, float coverRadius)
     {
-        short x = (short)(info.center.x + mapGridsState.GetLength(1) / 2);
-        short z = (short)(info.center.z + mapGridsState.GetLength(0) / 2);
-
-        for(int i = x - info.stats.length / 2 * 1; i < x + info.stats.length / 2 * 1; ++i)
+        return PathFinder.FindPath(mapGridsState, start, end, coverRadius) ?? new List<Vector3>{start, end};
+    }
+    public void RegisterBuildingLand(Collider collider)
+    {
+        RegisterBuildingLand(collider.bounds.center, collider.bounds.size.x, collider.bounds.size.z);
+    }
+    public void RegisterBuildingLand(Vector3 center, float length, float width)
+    {
+        for(int i = ToolMethod.EightTwoRoundToInt(center.x - length / 2); i < ToolMethod.TwoEightRoundToInt(center.x + length / 2); ++i)
         {
-            for(int j = z - info.stats.width / 2 * 1; j < z + info.stats.width / 2 * 1; ++j)
+            for(int j = ToolMethod.EightTwoRoundToInt(center.z - width / 2); j < ToolMethod.TwoEightRoundToInt(center.z + width / 2); ++j)
             {
-                mapGridsState[i, j] = true;
-                //Debug.Log(i + " " + j);
+                SetCoveredPos(i, j);
+                if(debug) Instantiate(visualizedMapQuad, new Vector3(i + 0.5f, 0.01f, j + 0.5f), Quaternion.Euler(90, 0, 0));
+                //Debug.Log(String.Format("i:{0},j:{1}", i, j));
             }
         }
     }
-    public bool HasEnoughLand(GridPos center, BuildingStats stats)
+    public bool CanStand(Vector3 pos, Collider coll)
     {
-        short x = (short)(center.x + mapGridsState.GetLength(1) / 2);
-        short z = (short)(center.z + mapGridsState.GetLength(0) / 2);
-        for(int i = x - stats.length / 2 * 1; i < x + stats.length / 2 * 1; ++i)
+        return CanStand(pos, Mathf.Max(coll.bounds.size.x, coll.bounds.size.z) / 2);
+    }
+    public bool CanStand(Vector3 pos, float radius)
+    {
+        //Debug.Log("000");
+        for(int i = ToolMethod.EightTwoRoundToInt(pos.x - radius); i < ToolMethod.TwoEightRoundToInt(pos.x + radius); ++i)
         {
-            for(int j = z - stats.width / 2 * 1; j < z + stats.width / 2 * 1; ++j)
+            for(int j = ToolMethod.EightTwoRoundToInt(pos.z - radius); j < ToolMethod.TwoEightRoundToInt(pos.z + radius); ++j)
             {
-                if(mapGridsState[i, j]) return false;
                 //Debug.Log(i + " " + j);
+                if(GetGridState(i, j)) return false;
             }
         }
         return true;
     }
-    
+    public bool CanArrive(Vector3 start, Vector3 end, float coverRadius)
+    {
+        return CanStand(end, coverRadius) && PathFinder.FindPath(mapGridsState, start, end, coverRadius) != null;
+    }
+    public bool CanArrive(Vector3 start, Vector3 end, Collider coll)
+    {
+        return CanArrive(start, end, Mathf.Max(coll.bounds.size.x, coll.bounds.size.z) / 2);
+    }
+    private void SetCoveredPos(int x, int z)
+    {
+        int i = x + mapGridsState.GetLength(1) / 2;
+        int j = z + mapGridsState.GetLength(0) / 2;
+        if(i < 0 || j < 0 || i >= mapGridsState.GetLength(0) || j >= mapGridsState.GetLength(1)) return;
+        mapGridsState[i, j] = true;
+        //Debug.Log(String.Format("i:{0},j:{1}", i, j));
+    }
+    private bool GetGridState(int x, int z)
+    {
+        int i = x + mapGridsState.GetLength(1) / 2;
+        int j = z + mapGridsState.GetLength(0) / 2;
+        if(i < 0 || j < 0 || i >= mapGridsState.GetLength(0) || j >= mapGridsState.GetLength(1)) return true;
+        return mapGridsState[i, j];
+    }
+    private void DrawVisualizedQuad(int i, int j)
+    {
+
+    }
 }

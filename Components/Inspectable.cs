@@ -11,13 +11,17 @@ namespace Components
     }
     public class Inspectable : GameComponent
     {
+        //********need set************
         [HideInInspector]public string inspectStr;
-        public Material rimLightMat;
-        private Material originalMat;
+        public Shader rimLightShader;
+        //****************************
+        private Shader originalShader;
         private bool inInspectMode;
         void Awake()
         {
-            originalMat = GetComponent<MeshRenderer>().material;
+            Material originalMat = GetComponent<MeshRenderer>().material;
+            originalShader = originalMat.shader;
+            originalMat.shader = rimLightShader;
         }
 
         void Update()
@@ -33,13 +37,13 @@ namespace Components
         {
             if(inInspectMode) return;
             inInspectMode = true;
-            GetComponent<MeshRenderer>().material = rimLightMat;
+            GetComponent<MeshRenderer>().material.shader = rimLightShader;
             UIManager.Instance.inspectWindow.InitInspect(this);
         }
         void StopInspect()
         {
             inInspectMode = false;
-            GetComponent<MeshRenderer>().material = originalMat;
+            GetComponent<MeshRenderer>().material.shader = originalShader;
             UIManager.Instance.inspectWindow.StopInspect();
         }
     }

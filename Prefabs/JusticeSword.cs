@@ -8,7 +8,7 @@ namespace Prefabs
     using Components;
     public class JusticeSword : PrefabComponent
     {
-        public override string loadPath
+        public override string bundleName
         {
             get => "JusticeSword";
         }
@@ -16,11 +16,16 @@ namespace Prefabs
         public override void DefaultInit()
         {
             Weapon weapon = gameObject.AddGameComponent<Weapon>();
-            weapon.damage = Constants.justice_sword_damage;
-            weapon.attackDuration = Constants.sword_attack_duration;
+            Combat.Config conf = new Combat.Config();
+            conf.damage = Constants.justice_sword_damage;
+            conf.attackDuration = Constants.sword_attack_duration;
+            conf.attackDistance = Constants.sword_attack_distance;
+            conf.hitDistance = Constants.sword_hit_distance;
+            weapon.combatConf = conf;
+            
             FiniteUse finiteUse = gameObject.AddGameComponent<FiniteUse>();
-            finiteUse.maxDurability = 100;
-            finiteUse.durability = 100;            
+            finiteUse.maxUse = 90;
+            finiteUse.currUse = 90;
         }
 
         void Awake()

@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,8 +6,9 @@ using Prefabs;
 using Components;
 using UI;
 using Player.UI;
-using Player.Action;
-using Newtonsoft.Json;
+using Actions;
+using Player.Actions;
+using Events;
 
 namespace Player
 {
@@ -16,7 +16,7 @@ namespace Player
     {
         public RuntimeAnimatorController handAnim;
         private Animator animator;
-        private ActionController actionController;
+        private EventHandler eventHandler;
 
         //背包中每个格子实际对应的物品
         public InventoryItem handEquipment
@@ -69,7 +69,7 @@ namespace Player
         void Awake()
         {
             animator = GetComponent<Animator>();
-            actionController = GetComponent<ActionController>();
+            eventHandler = GetComponent<EventHandler>();
 
             inventorySlotsContainer = inventoryPanel.transform.Find("Inventory Slots");
             equipmentSlotsContainer = inventoryPanel.transform.Find("Equipment Slots");
@@ -172,17 +172,20 @@ namespace Player
             Equipable equipable = item.GetComponent<Equipable>();
             equipments[equipmentSlots[equipable.equipSlotType]] = item;
             equipable.Equip(equipmentContainer[equipable.equipSlotType]);
+            if(equipable.GetComponent<Weapon>()) GetComponent<Combat>().SetWeapon(equipable.GetComponent<Weapon>());
             item.gameObject.SetActive(true);
             item.GetComponent<Rigidbody>().isKinematic = true;
             item.GetComponent<Collider>().enabled = false;
             item.GetComponent<Pickable>().enabled = false;
-            if(equipable.overrideAnimator) ReplaceAnimator(equipable.overrideAnimator.runtimeAnimatorController);
+            //if(equipable.overrideAnimator) ReplaceAnimator(equipable.overrideAnimator.runtimeAnimatorController);
+            animator.runtimeAnimatorController = equipable.overrideAnimator;
         }
         //用新装备的animator替换原有animator
         //需要注意如果使用帧动画调用改函数，意味着该帧之后的帧不会被播放，因为替换动画机会重置动画的播放
         private void ReplaceAnimator(RuntimeAnimatorController newAnimator)
         {
             animator.runtimeAnimatorController = newAnimator;
+            
         }
         //保留物品用于之后的操作
         private void SaveItem(InventoryItem item)
@@ -277,15 +280,8 @@ namespace Player
         //Right Click Item
         public void TryDropItem(ItemSlot slot)
         {
-            if(!inventoryItems[slot])
-            {
-                Debug.LogError("no drop item");
-                return;
-            } 
-            if(actionController.DoAction<DropController>(false, slot))
-            {
-                if(handEquipment) handEquipment.gameObject.SetActive(false);
-            }
+            if(!inventoryItems[slot]) return;
+            eventHandler.RaiseEvent("Drop", slot);
         }
         public void DropItem(ItemSlot slot)
         {
@@ -293,8 +289,7 @@ namespace Player
             {
                 Debug.LogError("no drop item");
                 return;
-            } 
-
+            }
             FreeItem(inventoryItems[slot]);
             inventoryItems[slot] = null;
             UpdateUI();
@@ -321,8 +316,8 @@ namespace Player
             {
                 Debug.LogError("no equipment to unequip");
                 return;
-            } 
-            actionController.DoAction<UnEquipController>(false, slot);
+            }
+            eventHandler.RaiseEvent("UnEquip", slot);
         }
         public void UnEquipItem(EquipmentSlot slot)
         {
@@ -333,11 +328,13 @@ namespace Player
             }
             InventoryItem item = equipments[slot];
             equipments[slot] = null;
+            Combat combat = GetComponent<Combat>();
+            combat.ApplyConfig("default");
             if(!AddNormalItem(item))
             {
                 FreeItem(item);
             }
-            ReplaceAnimator(handAnim);
+            animator.runtimeAnimatorController = handAnim;
             UpdateUI();
         }
 

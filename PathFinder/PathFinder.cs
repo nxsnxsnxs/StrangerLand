@@ -84,7 +84,7 @@ namespace PathFinding
         /// <param name="start"></param>起点
         /// <param name="end"></param>终点
         /// <returns></returns>
-        public static List<Vector3> FindPath(bool[,] grids, Vector3 start, Vector3 end)
+        public static List<Vector3> FindPath(bool[,] grids, Vector3 start, Vector3 end, float coverRadius)
         {
             if(start.x == end.x && start.z == end.z) return null;
             PriorityQueue<PathPoint> openList = new PriorityQueue<PathPoint>();
@@ -99,6 +99,7 @@ namespace PathFinding
             else if(end.x < start.x) endX++;
             if(end.z > start.z) startZ++;
             else if(end.z < start.z) endZ++;
+            int coverGridsRaius = Mathf.CeilToInt(coverRadius);
 
             openList.Enqueue(new PathPoint((short)startX, (short)startZ));
             bool find = false;
@@ -110,7 +111,7 @@ namespace PathFinding
                     Debug.Log("pathfind fail");
                     break;
                 }
-                List<PathPoint> surroundPoint = GetSurroundPoint(grids, center);
+                List<PathPoint> surroundPoint = GetSurroundPoint(grids, center, coverGridsRaius);
                 /*Debug.Log(center.x + " " + center.z);
                 foreach (var item in surroundPoint)
                 {
@@ -126,7 +127,7 @@ namespace PathFinding
                     else
                     {
                         item.Init(center, endX, endZ);
-                        if(item.x == endX && item.z == endZ)
+                        if(CanReachTarget(item, end, coverRadius))
                         {
                             find = true;
                             closeList.Add(center);
@@ -166,7 +167,7 @@ namespace PathFinding
                     //UnityEngine.Debug.Log(path[pre]);
                     //UnityEngine.Debug.Log(path[next]);
                     //相邻点无需检测肯定直接可达
-                    if(next == pre + 1 || DirectlyReachable(grids, path[pre], path[next]))
+                    if(next == pre + 1 || DirectlyReachable(grids, path[pre], path[next], coverGridsRaius))
                     {
                         //UnityEngine.Debug.Log(true);
                         result.Add(path[pre]);
@@ -182,15 +183,121 @@ namespace PathFinding
                 }
                 return result;
             }
-            else
+            else return null;
+        }
+        public static List<Vector3> FindPath(bool[,] grids, Vector3 start, Collider target, float coverRadius)
+        {
+            Vector3 end = target.transform.position;
+            if(start.x == end.x && start.z == end.z) return null;
+            PriorityQueue<PathPoint> openList = new PriorityQueue<PathPoint>();
+            List<PathPoint> closeList = new List<PathPoint>();
+            //为了使角色不在寻路时走“回头路”，我们需要在取网格时根据方向而不是直接floor
+            //简单说应该朝着靠近的方向取整
+            startX = Mathf.FloorToInt(start.x);
+            endX = Mathf.FloorToInt(end.x);
+            startZ = Mathf.FloorToInt(start.z);
+            endZ = Mathf.FloorToInt(end.z);
+            if(end.x > start.x) startX++;
+            else if(end.x < start.x) endX++;
+            if(end.z > start.z) startZ++;
+            else if(end.z < start.z) endZ++;
+            int coverGridsRaius = Mathf.CeilToInt(coverRadius);
+
+            openList.Enqueue(new PathPoint((short)startX, (short)startZ));
+            bool find = false;
+            while(openList.Count != 0 && !find)
             {
+                PathPoint center = openList.Dequeue();
+                if(center.F > 400)
+                {
+                    Debug.Log("pathfind fail");
+                    break;
+                }
+                List<PathPoint> surroundPoint = GetSurroundPoint(grids, center, coverGridsRaius);
+                /*Debug.Log(center.x + " " + center.z);
+                foreach (var item in surroundPoint)
+                {
+                    Debug.Log(item.x + " " + item.z);
+                }*/
+                foreach (var item in surroundPoint)
+                {
+                    if(closeList.Exists(item.Equal)) continue;
+                    if(openList.Exists(item.Equal))
+                    {
+                        item.TryUpdateParent(center);
+                    }
+                    else
+                    {
+                        item.Init(center, endX, endZ);
+                        if(CanReachTarget(item, target, coverRadius))
+                        {
+                            find = true;
+                            closeList.Add(center);
+                            closeList.Add(item);
+                            break;
+                        }                          
+                        openList.Enqueue(item);
+                    }
+                }
+                if(!find) closeList.Add(center);
+            }
+            if(find)
+            {
+                PathPoint p = closeList[closeList.Count - 1];
+                List<Vector3> path = new List<Vector3>();
+                //仅保留拐点
+                Vector2 lastDirection = new Vector2(0, 0);
+                while(p.parent != null)
+                {
+                    PathPoint q = p.parent;
+                    Vector2 direction = new Vector2(q.x - p.x, q.z - p.z);
+                    if(direction != lastDirection) path.Add(p.GetVector());
+                    lastDirection = direction;
+                    p = q;
+                }
+                path.Add(p.GetVector());
+                path.Reverse();
+                //以精确点替代
+                path[0] = start;
+                //连接可直达的点，去除不必要的拐点，进行路径平滑
                 List<Vector3> result = new List<Vector3>();
-                result.Add(start);
-                result.Add(end);
+                int pre = 0;
+                int next = path.Count - 1;
+                for(; next > pre; --next)
+                {
+                    //UnityEngine.Debug.Log(path[pre]);
+                    //UnityEngine.Debug.Log(path[next]);
+                    //相邻点无需检测肯定直接可达
+                    if(next == pre + 1 || DirectlyReachable(grids, path[pre], path[next], coverGridsRaius))
+                    {
+                        //UnityEngine.Debug.Log(true);
+                        result.Add(path[pre]);
+                        pre = next;
+                        next = path.Count;
+                    }
+                    //else UnityEngine.Debug.Log(false);
+                }
+                //添加剩余不可简化的点
+                while(pre < path.Count)
+                {
+                    result.Add(path[pre++]);
+                }
+                result.Add(target.ClosestPointOnBounds(result[result.Count - 1]));
                 return result;
             }
+            else return null;
         }
-        private static List<PathPoint> GetSurroundPoint(bool[,] grids, PathPoint center)
+        private static bool CanReachTarget(PathPoint curr, Collider target, float radius)
+        {
+            Vector3 pos = curr.GetVector();
+            return target.ClosestPointOnBounds(pos).PlanerDistance(pos) < Mathf.CeilToInt(radius) + 1;
+        }
+        private static bool CanReachTarget(PathPoint curr, Vector3 dst, float radius)
+        {
+            Vector3 pos = curr.GetVector();
+            return dst.PlanerDistance(pos) <= radius;
+        }
+        private static List<PathPoint> GetSurroundPoint(bool[,] grids, PathPoint center, int coverRadius)
         {
             short indexX = center.x;
             short indexZ = center.z;
@@ -206,68 +313,74 @@ namespace PathFinding
             //（x， y）为false仅能说明xy右上角的方格内没有建筑，但人物实际上需要（x-1，y）（x-1，y-1）（x，y-1）都为false
             //这周围四格都没有建筑才能站在（x，y）这一点
             //two
-            if(Walkable(grids, indexX, indexZ + 1))
+            if(Walkable(grids, indexX, indexZ + 1, coverRadius))
             {
                 two = true;
                 surroundPoint.Add(new PathPoint(center.x, (short)(center.z + 1)));
             }
             //four
-            if(Walkable(grids, indexX - 1, indexZ))
+            if(Walkable(grids, indexX - 1, indexZ, coverRadius))
             {
                 four = true;
                 surroundPoint.Add(new PathPoint((short)(center.x - 1), center.z));
             }
             //five
-            if(Walkable(grids, indexX + 1, indexZ))
+            if(Walkable(grids, indexX + 1, indexZ, coverRadius))
             {
                 five = true;
                 surroundPoint.Add(new PathPoint((short)(center.x + 1), center.z));
             }
             //seven
-            if(Walkable(grids, indexX, indexZ - 1))
+            if(Walkable(grids, indexX, indexZ - 1, coverRadius))
             {
                 seven = true;
                 surroundPoint.Add(new PathPoint(center.x, (short)(center.z - 1)));
             }
             //one
-            if((two || four) && Walkable(grids, indexX - 1, indexZ + 1))
+            if((two || four) && Walkable(grids, indexX - 1, indexZ + 1, coverRadius))
             {
                 surroundPoint.Add(new PathPoint((short)(center.x - 1), (short)(center.z + 1)));
             }
             //three
-            if((two || five) && Walkable(grids, indexX + 1, indexZ + 1))
+            if((two || five) && Walkable(grids, indexX + 1, indexZ + 1, coverRadius))
             {
                 surroundPoint.Add(new PathPoint((short)(center.x + 1), (short)(center.z + 1)));
             }
             //six
-            if((four || seven) && Walkable(grids, indexX - 1, indexZ - 1))
+            if((four || seven) && Walkable(grids, indexX - 1, indexZ - 1, coverRadius))
             {
                 surroundPoint.Add(new PathPoint((short)(center.x - 1), (short)(center.z - 1)));
             }
             //eight
-            if((five || seven) && Walkable(grids, indexX + 1, indexZ - 1))
+            if((five || seven) && Walkable(grids, indexX + 1, indexZ - 1, coverRadius))
             {
                 surroundPoint.Add(new PathPoint((short)(center.x + 1), (short)(center.z - 1)));
             }
             return surroundPoint;
         }
-        private static bool Walkable(bool[,] grids, int x, int z)
+        private static bool Walkable(bool[,] grids, int x, int z, int coverRadius)
         {
             //终点的那个点永远可达(因为不会实际站在那个点)
             //主要是考虑采用自动搜寻建筑物目标（向目标碰撞体发射线取终点）的方式，终点那个点对应的格子一定是被建筑物覆盖不可走的，
             //那样的话无论如何都会寻路失败，但寻路不应该因为那个点而失败所以添加此特判
             //但与此同时也就要求FindPath不应该传入NotWalkable的终点
-            if(x == endX && z == endZ) return true;
+            //if(x == endX && z == endZ) return true;
 
             short rows = (short)grids.GetLength(0);
             short columns = (short)grids.GetLength(1);
             x += columns / 2;
             z += rows / 2;
-            return (x >= 0 && x < rows && z >= 0 && z < columns &&
-             !grids[x, z] && (x - 1 < 0 || !grids[x - 1, z]) && 
-             (z - 1 < 0 || !grids[x, z - 1]) && (x - 1 < 0 || z - 1 < 0 || !grids[x - 1, z - 1]));
+            for(int i = x - coverRadius; i < x + coverRadius; ++i)
+            {
+                for(int j = z - coverRadius; j < z + coverRadius; ++j)
+                {
+                    if(i < 0 || j < 0 || i >= rows || j >= columns || grids[i, j]) return false;
+                    //Debug.Log(String.Format("i:{0},j:{1}", i, j));
+                }
+            }
+            return true;
         }
-        private static bool DirectlyReachable(bool[,] grids, Vector3 start, Vector3 end)
+        private static bool DirectlyReachable(bool[,] grids, Vector3 start, Vector3 end, int coverRadius)
         {
             float gradient;
             if(end.x == start.x) gradient = float.MaxValue;//避免除0
@@ -284,7 +397,7 @@ namespace PathFinding
                 for(int i = beginLoop + 1; i < endLoop; ++i)
                 {
                     int x = i, z = Mathf.FloorToInt(gradient * (i - start.x) + start.z);
-                    if(!Walkable(grids, x, z))
+                    if(!Walkable(grids, x, z, coverRadius))
                     {
                         //UnityEngine.Debug.DrawLine(start, new Vector3(x, 0, z), Color.blue, 180);
                         return false;
@@ -299,7 +412,7 @@ namespace PathFinding
                 {
                     int x = (gradient != float.MaxValue) ? Mathf.FloorToInt((i - start.z) / gradient + start.x) : startX;
                     int z = i;
-                    if(!Walkable(grids, x, z))
+                    if(!Walkable(grids, x, z, coverRadius))
                     {
                         //UnityEngine.Debug.DrawLine(start, new Vector3(x, 0, z), Color.blue, 180);
                         return false;

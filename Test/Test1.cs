@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Test1 : MonoBehaviour, x
+public class Test1 : MonoBehaviour
 {
-    public void Do()
+    
+    void Start()
     {
-        Debug.Log(1);
+        Debug.Log(GetComponent<Test3>());
     }
 }

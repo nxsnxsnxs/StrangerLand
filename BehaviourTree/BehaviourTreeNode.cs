@@ -11,13 +11,9 @@ namespace MyBehaviourTree
         {
             Ready, Failure, Success, Running
         }
-        public BehaviourTree bt;
         public NodeState status;
-
-        public BehaviourTreeNode(BehaviourTree _bt)
-        {
-            bt = _bt;
-        }
+        public BehaviourTreeNode parent;
+        
         public abstract void Tick();
         public virtual void Reset()
         {

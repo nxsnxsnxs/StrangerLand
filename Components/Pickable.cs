@@ -10,7 +10,10 @@ namespace Components
     }
     public class Pickable : GameComponent
     {
+        //********need set************
         public PickType type;
+        public float harvestTime;
+        //****************************
 
         public InventoryItem Pick()
         {

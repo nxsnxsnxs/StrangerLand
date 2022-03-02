@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Player.Construction;
-using Player.Action;
+using Actions;
+using Player.Actions;
+using Prefabs.Player;
 
 namespace UI
 {
@@ -58,8 +60,8 @@ namespace UI
         public void ConstructBuilding(BuildingStats bs)
         {
             GetComponent<Animator>().Play("Close");
-            ActionController ac = FindObjectOfType<ActionController>();
-            ac.DoAction<ConstructionController>(true, bs);
+            ActionController ac = FindObjectOfType<Character>().GetComponent<ActionController>();
+            ac.DoAction<ConstructionController>(bs);
         }
         public void Close()
         {

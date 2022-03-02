@@ -7,9 +7,14 @@ namespace MyBehaviourTree
     public abstract class Composite : BehaviourTreeNode
     {
         protected List<BehaviourTreeNode> children;
-        public Composite(BehaviourTree _bt, List<BehaviourTreeNode> _children) : base(_bt)
+
+        public Composite(List<BehaviourTreeNode> _children)
         {
             children = _children;
+            foreach (var child in children)
+            {
+                child.parent = this;
+            }
         }
         public override void Reset()
         {

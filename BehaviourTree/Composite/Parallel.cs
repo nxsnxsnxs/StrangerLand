@@ -6,7 +6,7 @@ namespace MyBehaviourTree
 {
     public class Parallel : Composite
     {
-        public Parallel(BehaviourTree bt, List<BehaviourTreeNode> children) : base(bt, children)
+        public Parallel(List<BehaviourTreeNode> children) : base(children)
         {
 
         }

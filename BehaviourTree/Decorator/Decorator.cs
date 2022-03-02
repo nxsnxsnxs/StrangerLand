@@ -7,9 +7,10 @@ namespace MyBehaviourTree
     public abstract class Decorator : BehaviourTreeNode
     {
         public BehaviourTreeNode child;
-        public Decorator(BehaviourTree tree, BehaviourTreeNode _child) : base(tree)
+        public Decorator(BehaviourTreeNode _child)
         {
             child = _child;
+            child.parent = this;
         }
         public override void Reset()
         {

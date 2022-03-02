@@ -7,10 +7,12 @@ namespace MyBehaviourTree
     public class PrioritySelector : Composite
     {
         int runningChild;
-        public PrioritySelector(BehaviourTree bt, List<BehaviourTreeNode> children) : base(bt, children)
+
+        public PrioritySelector(List<BehaviourTreeNode> _children) : base(_children)
         {
-            
+
         }
+
         public override void Tick()
         {
             for(int i = 0; i < children.Count; ++i)

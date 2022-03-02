@@ -14,9 +14,9 @@ namespace Player.Construction
         //名称（中文）
         public string name;
         //大小（xz单位为网格）
-        public byte length;//x
-        public byte width;//z
-        public float height;//pivot在y轴高度（即当建筑物底部着地时的y轴坐标，用于确定建筑物的放置坐标）
+        //public byte length;//x
+        //public byte width;//z
+        //public float height;//pivot在y轴高度（即当建筑物底部着地时的y轴坐标，用于确定建筑物的放置坐标）
         //建造价格
         public int wood_request;
         public int stone_request;

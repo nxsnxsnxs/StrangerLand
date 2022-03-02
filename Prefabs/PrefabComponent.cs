@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,14 @@ using Components;
 
 namespace Prefabs
 {
+    [FlagsAttribute]
+    public enum GameTag
+    {
+        creature = 0x0001,
+        player = 0x0002,
+        neutral = 0x0004,
+        evil = 0x0008
+    }
     public abstract class PrefabComponent : MonoBehaviour
     {
         public class PersistentPrefabData
@@ -30,16 +39,28 @@ namespace Prefabs
                 pc.Init(componentData);
             }
         }
-        public abstract string loadPath
-        {
-            get;
-        }
+        public abstract string bundleName {get;}
+        private GameTag gameTag;
         public void Init(Dictionary<string, object> componentData)
         {
             DefaultInit();
             if(componentData != null) InitComponentsData(componentData);
         }
-        public KeyValuePair<int, string> GetPersistentData()
+
+        void Awake()
+        {
+            Init(null);
+        }
+        public void AddTag(GameTag tag)
+        {
+            gameTag |= tag;
+        }
+        public bool HasTag(GameTag tag)
+        {
+            return (gameTag & tag) != 0;
+        }
+
+        public string GetPersistentData()
         {
             PersistentPrefabData data = new PersistentPrefabData();
             data.x = transform.position.x;
@@ -48,12 +69,12 @@ namespace Prefabs
             data.pitch = transform.rotation.eulerAngles.x;
             data.yaw = transform.rotation.eulerAngles.y;
             data.roll = transform.rotation.eulerAngles.z;
-            data.loadPath = loadPath;
+            data.loadPath = bundleName;
             foreach (var item in GetComponents<GameComponent>())
             {
                 item.SaveData(data.componentData);
             }
-            return new KeyValuePair<int, string>(GetInstanceID(), JsonConvert.SerializeObject(data));
+            return JsonConvert.SerializeObject(data);
         }
         public abstract void DefaultInit();
         public void InitComponentsData(Dictionary<string, object> componentData)

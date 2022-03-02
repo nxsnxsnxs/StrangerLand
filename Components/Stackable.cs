@@ -6,8 +6,10 @@ namespace Components
 {
     public class Stackable : GameComponent
     {
+        //********need set************
         public int count;
         public int maxCount;
         public MonoBehaviour owner;
+        //***************************
     }
 }

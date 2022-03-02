@@ -4,7 +4,7 @@ namespace Player.Construction
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.Events;
-    using Player.Action;
+    using Player.Actions;
 
     public class Constructable : MonoBehaviour
     {
@@ -36,12 +36,10 @@ namespace Player.Construction
         }
         void Start()
         {
-            BoxCollider collider = gameObject.AddComponent<BoxCollider>();
-            SetCoveredCollider(info, collider);//设置collider信息
-            foreach(Collider col in GetComponentsInChildren<Collider>())
-            {
-                col.isTrigger = true;
-            }
+            building.GetComponent<Collider>().isTrigger = true;
+            /*Debug.Log(building.GetComponent<Collider>().bounds.center.y - building.transform.position.y);
+            float y = building.GetComponent<Collider>().bounds.size.y / 2 - (building.GetComponent<Collider>().bounds.center.y - building.transform.position.y);
+            building.transform.localPosition = new Vector3(building.transform.localPosition.x, y, building.transform.localPosition.z);*/
             //设置了刚体才能检测到与其他建筑物的碰撞（因为其他建筑物没有刚体）
             Rigidbody rb = gameObject.AddComponent<Rigidbody>();
             rb.isKinematic = true;
@@ -95,8 +93,8 @@ namespace Player.Construction
             LayerMask layerMask = 1 << LayerMask.NameToLayer("ground");
             if(Physics.Raycast(ray, out raycastHit, float.PositiveInfinity, layerMask.value))
             {
-                GridPos buildPos = GridPos.GetGridPos(raycastHit.point + Vector3.up * info.stats.height);
-                transform.position = buildPos.Pos;                
+                GridPos buildPos = GridPos.GetGridPos(raycastHit.point);
+                transform.position = buildPos.Pos;              
             }
         }
         /// <summary>
@@ -111,26 +109,12 @@ namespace Player.Construction
                 mrs[i].material = originalMats[i];
             }
             //恢复建筑物的collider
-            foreach(Collider col in building.GetComponentsInChildren<Collider>())
-            {
-                col.isTrigger = false;
-            }
+            building.GetComponent<Collider>().isTrigger = false;
             transform.DetachChildren();
             info.center = GridPos.GetGridPos(transform.position);
-            MapManager.Instance.AddBuilding(info);
+            MapManager.Instance.RegisterBuildingLand(building.GetComponent<Collider>());
             preBuildFinishCallback?.Invoke(true);
             Destroy(gameObject);
-        }
-        /// <summary>
-        /// 通过BuildingInfo配置一块不可放置区域碰撞体
-        /// </summary>
-        /// <param name="buildingInfo"></param>
-        /// <param name="collider"></param>
-        static void SetCoveredCollider(BuildingInfo buildingInfo, BoxCollider collider)
-        {
-            collider.center = Vector3.zero;
-            collider.size = new Vector3(buildingInfo.stats.length, buildingInfo.stats.height, buildingInfo.stats.width);
-            collider.isTrigger = true;
         }
     }
 }
