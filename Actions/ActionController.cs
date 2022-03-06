@@ -58,7 +58,7 @@ namespace Actions
         [HideInInspector]public bool finish;
         //actiontrigger注册表
         public Dictionary<string, ActionTrigger> triggers = new Dictionary<string, ActionTrigger>();
-        protected Animator animator;
+        protected Animator animator => GetComponent<Animator>();
         //动作启动函数
         public abstract void Begin(params object[] args);
         //被打断
@@ -86,10 +86,6 @@ namespace Actions
                 triggers[key].Reset();
             }
         }
-        void Awake()
-        {
-            animator = GetComponent<Animator>();
-        }
     }
     public class ActionController : MonoBehaviour
     {
@@ -97,10 +93,12 @@ namespace Actions
         public delegate void ActionFinishCallback(bool finish);
         
         public bool debug;
+        //长期监听回调
         public ActionBeginCallback onActionBegin;
         public ActionFinishCallback onActionFinish;
         private BaseAction currentAction;
-        private ActionFinishCallback currentCallback;
+        //对当前动作的监听
+        private ActionFinishCallback onCurrentActionFinish;
 
         void Init()
         {
@@ -121,10 +119,10 @@ namespace Actions
                 currentAction.ResetActionTrigger();
                 currentAction.enabled = false;
                 currentAction = null;
-                if(currentCallback != null)
+                if(onCurrentActionFinish != null)
                 {
-                    currentCallback(true);
-                    currentCallback = null;
+                    onCurrentActionFinish(true);
+                    onCurrentActionFinish = null;
                 }
                 if(onActionFinish != null) onActionFinish(true);
             } 
@@ -144,10 +142,10 @@ namespace Actions
                 currentAction.enabled = false;
                 currentAction.Interrupted();
                 currentAction.ResetActionTrigger();
-                if(currentCallback != null)
+                if(onCurrentActionFinish != null)
                 {
-                    currentCallback(false);
-                    currentCallback = null;
+                    onCurrentActionFinish(false);
+                    onCurrentActionFinish = null;
                 }
                 if(onActionFinish != null) onActionFinish(false);
                 if(debug) Debug.Log("ActionInterrupted: " + currentAction.actionName + " by " + action.actionName);
@@ -184,7 +182,7 @@ namespace Actions
         public void SetCallback(ActionFinishCallback callback)
         {
             if(currentAction == null) return;
-            currentCallback = callback;
+            onCurrentActionFinish = callback;
         }
     }
 }

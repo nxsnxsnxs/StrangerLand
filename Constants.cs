@@ -5,7 +5,7 @@ using UnityEngine;
 public class Constants
 {
     //common
-    public const float deadbody_disappear_time = 4.5f;
+    public const float deadbody_disappear_time = 3f;
     public const float max_chase_distance = 15f;
     //projectile fly speed
     public const float slow_projectile_fly_speed = 7.5f;
@@ -98,5 +98,6 @@ public class Constants
     public const float scorpion_telson_attack_damage = 15;
     public const float scorpion_telson_attack_duration = 0f;
     public const float scorpion_telson_attack_distance = 6.5f;
+    public const float scorpion_max_noattack_time = 13f;
 
 }

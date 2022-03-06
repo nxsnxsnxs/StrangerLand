@@ -52,6 +52,7 @@ namespace MyBehaviourTree.Behaviours
                 }
                 if(combat.CanDoAttack())
                 {
+                    gameObject.transform.PlanerLookAt(combat.target.transform.position);
                     actionController.DoAction<AttackAction>();
                     doAttack = true;
                     startChaseTime = Time.time;

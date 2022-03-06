@@ -27,7 +27,6 @@ namespace Player.Actions
 
         void Init()
         {
-            animator = GetComponent<Animator>();
             viewController = GetComponent<ViewController>();
             inventoryController = GetComponent<InventoryController>();
             combat = GetComponent<Combat>();

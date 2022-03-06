@@ -29,8 +29,7 @@ namespace Actions
 
             void Awake()
             {
-                animator = GetComponent<Animator>();
-                scorpionPrefab = ABManager.Instance.LoadAsset<GameObject>("Scorpion", "Scorpion");
+                scorpionPrefab = ABManager.Instance.LoadAsset<GameObject>("Scorpion", "Prefab");
                 RegisterTrigger("summonfinish");
             }
 

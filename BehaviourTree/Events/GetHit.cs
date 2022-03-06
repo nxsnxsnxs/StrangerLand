@@ -15,10 +15,7 @@ namespace MyBehaviourTree.Events
         :base(gameObject, e, new PrioritySelector(
             new List<BehaviourTreeNode>{
                 new IFNode(
-                    () => 
-                    {
-                        return gameObject.GetComponent<Health>().health == 0 && !gameObject.GetComponent<ActionController>().isDoing<CommonAction.Die>();
-                    }, 
+                    () => gameObject.GetComponent<Health>().health == 0 && !gameObject.GetComponent<ActionController>().isDoing<CommonAction.Die>(),
                     new DoAction<DieAction>(gameObject, "die")
                 ),
                 new Sequence
@@ -30,8 +27,6 @@ namespace MyBehaviourTree.Events
                 )
             }
         ))
-        {
-            
-        }
+        {}
     }
 }

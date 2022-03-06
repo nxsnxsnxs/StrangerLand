@@ -18,6 +18,7 @@ namespace Brains
             (
                 new List<BehaviourTreeNode>
                 {
+                    new IFNode(ShouldSuicide, new DoAction<CommonAction.Die>(gameObject, "suicide")),
                     new GetHit<CommonAction.GetHit, CommonAction.Die>(gameObject, new CommonEvents.GetHit()),
                     new IFNode(ShouldTelsonAttack, new ChaseAndAttack<CommonAction.Move, ACScorpion.TelsonAttack>(gameObject, "telsonattack", 10, "telsonattack")),
                     new RandomNode
@@ -38,6 +39,10 @@ namespace Brains
         private bool ShouldTelsonAttack() 
         {
             return GetComponent<Combat>().IsReady("telsonattack") && !GetComponent<ActionController>().isDoing<CommonAction.Attack>();
+        }
+        private bool ShouldSuicide()
+        {
+            return !GetComponent<Combat>().IsValidTarget() && GetComponent<Combat>().lastAttack + Constants.scorpion_max_noattack_time <= Time.time;
         }
     }
 }

@@ -32,7 +32,6 @@ namespace Actions
 
             void Awake()
             {
-                animator = GetComponent<Animator>();
                 actionController = GetComponent<ActionController>();
                 locomotor = GetComponent<Locomotor>();
             }

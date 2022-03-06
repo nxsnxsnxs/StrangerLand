@@ -20,16 +20,18 @@ namespace Actions
             float[] weights = new float[]{0.5f, 1};
             protected override string attackAnimStr
             {
-                get
-                {
-                    return ToolMethod.GetRandomChoice<string>(animStrs, weights);
-                }
+                get => randomAttackStr;
+            }
+            protected string randomAttackStr;
+            public override void Begin(params object[] args)
+            {
+                randomAttackStr = ToolMethod.GetRandomChoice<string>(animStrs, weights);
+                base.Begin(args);
             }
         }
         public class DoublePinchAttack : CommonAction.DoubleAttack
         {
             protected override string attackAnimStr => "DoublePinchAttack";
-            protected override string stopAttackAnimStr => "StopDoublePinchAttack";
         }
         public class TelsonAttack : CommonAction.Attack
         {

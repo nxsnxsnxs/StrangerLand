@@ -20,11 +20,15 @@ namespace Prefabs
 
         public override void DefaultInit()
         {
+            AddTag(GameTag.creature);
+            AddTag(GameTag.neutral);
+
             EventHandler eventHandler = gameObject.AddComponent<EventHandler>();
             eventHandler.ListenEvent("hasmineraround", OnHasMinerAround);
             ActionController actionController = gameObject.AddComponent<ActionController>();
-            //actionController.debug = true;
+            actionController.debug = true;
 
+            EffectHandler effectHandler = gameObject.AddGameComponent<EffectHandler>();
             Locomotor locomotor = gameObject.AddGameComponent<Locomotor>();
             locomotor.defaultMoveSpeed = Constants.golem_move_speed;
             locomotor.debug = true;
@@ -37,7 +41,7 @@ namespace Prefabs
             health.health = health.maxHealth;
 
             brain = gameObject.AddComponent<GolemEarthBrain>();
-            //brain.debug = true;
+            brain.debug = true;
             brain.Begin();
         }
         private void InitCombat(Combat combat)

@@ -23,7 +23,6 @@ namespace Actions
             private Coroutine current;
             void Init()
             {
-                animator = gameObject.GetComponent<Animator>();
                 RegisterTrigger("gethitfinish");
             }
             void Awake()

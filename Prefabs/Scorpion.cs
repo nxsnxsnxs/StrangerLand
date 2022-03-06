@@ -25,7 +25,7 @@ namespace Prefabs
             EventHandler eventHandler = gameObject.AddComponent<EventHandler>();
             eventHandler.ListenEvent("setcommander", OnGotKing);
             ActionController actionController = gameObject.AddComponent<ActionController>();
-            actionController.debug = true;
+            //actionController.debug = true;
 
             Locomotor locomotor = gameObject.AddGameComponent<Locomotor>();
             locomotor.defaultMoveSpeed = Constants.scorpion_move_speed;
@@ -38,7 +38,7 @@ namespace Prefabs
             health.health = health.maxHealth;
 
             brain = gameObject.AddComponent<ScorpionBrain>();
-            brain.debug = true;
+            //brain.debug = true;
             brain.Begin();
         }
         void InitCombat(Combat combat)

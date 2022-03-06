@@ -18,7 +18,6 @@ namespace Player.Actions
 
         void Awake()
         {
-            animator = GetComponent<Animator>();
             inventoryController = GetComponent<InventoryController>();
 
             RegisterTrigger("drop");

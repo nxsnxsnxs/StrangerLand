@@ -23,7 +23,6 @@ namespace Player.Actions
 
         void Awake()
         {
-            animator = GetComponent<Animator>();
             inventoryController = GetComponent<InventoryController>();
             viewController = GetComponent<ViewController>();
             actionController = GetComponent<ActionController>();

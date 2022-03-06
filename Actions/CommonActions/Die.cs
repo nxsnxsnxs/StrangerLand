@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Brains;
+using Tools;
+using Components;
+using Prefabs;
 
 namespace Actions
 {
@@ -28,6 +31,11 @@ namespace Actions
                 GetComponent<Collider>().enabled = false;
                 GetComponent<Brain>().Stop();
                 animator.SetTrigger("Die");
+                Destroy(GetComponent<PrefabComponent>());
+                foreach(var component in GetComponents<GameComponent>())
+                {
+                    Destroy(component);
+                }
                 while(!triggers["diefinish"]) yield return null;
                 yield return new WaitForSeconds(Constants.deadbody_disappear_time);
                 Destroy(gameObject);

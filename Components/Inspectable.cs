@@ -13,15 +13,13 @@ namespace Components
     {
         //********need set************
         [HideInInspector]public string inspectStr;
-        public Shader rimLightShader;
+        public Material rimLightMat;
         //****************************
-        private Shader originalShader;
+        private Material originalMat;
         private bool inInspectMode;
         void Awake()
         {
-            Material originalMat = GetComponent<MeshRenderer>().material;
-            originalShader = originalMat.shader;
-            originalMat.shader = rimLightShader;
+            originalMat = GetComponent<MeshRenderer>().material;
         }
 
         void Update()
@@ -37,13 +35,13 @@ namespace Components
         {
             if(inInspectMode) return;
             inInspectMode = true;
-            GetComponent<MeshRenderer>().material.shader = rimLightShader;
+            GetComponent<MeshRenderer>().material = rimLightMat;
             UIManager.Instance.inspectWindow.InitInspect(this);
         }
         void StopInspect()
         {
             inInspectMode = false;
-            GetComponent<MeshRenderer>().material.shader = originalShader;
+            GetComponent<MeshRenderer>().material = originalMat;
             UIManager.Instance.inspectWindow.StopInspect();
         }
     }

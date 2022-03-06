@@ -22,7 +22,6 @@ namespace Prefabs.Player
             Locomotor locomotor = gameObject.AddGameComponent<Locomotor>();
             locomotor.moveSpeed = Constants.player_move_speed;
             
-            EffectHandler effectHandler = gameObject.AddGameComponent<EffectHandler>();
             Combat combat = gameObject.AddGameComponent<Combat>();
             Combat.Config conf = new Combat.Config();
             conf.attackDistance = Constants.hand_attack_distance;

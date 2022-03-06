@@ -16,6 +16,7 @@ namespace Prefabs.Player
         {
             AddTag(GameTag.creature);
             AddTag(GameTag.player);
+            EffectHandler effectHandler = gameObject.AddGameComponent<EffectHandler>();
         }
     }
 }

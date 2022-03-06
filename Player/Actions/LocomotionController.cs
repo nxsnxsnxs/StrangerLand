@@ -9,15 +9,6 @@ using Components;
 
 namespace Player.Actions
 {
-    //LocomotionController是最特殊的一类Action，它包含两种类型的移动
-    //一、使用键盘控制的自主移动
-    //这类移动开始的标志为按下任意一个移动键，结束的标志为速度为0（没有任何一个移动键被按下，或者同时按下相反方向移动键）
-    //二、协程移动
-    //这部分与其他action基本相同，只不过不需要actiontrigger
-    //此外，协程移动不仅可以被actioncontroller调用，还可以被其他playeraction调用
-    //注意当其它playeraction被终止时即使他们正在使用协程移动，也不会调用LocomotionController的interrupt
-    //所以外包的协程移动不应该依赖于该脚本内的变量状态，应当是完全独立的一个函数体（协程）
-
     public class LocomotionController : BaseAction
     {
         private ViewController viewController;
@@ -29,7 +20,6 @@ namespace Player.Actions
 
         void Awake()
         {
-            animator = GetComponent<Animator>();
             viewController = GetComponent<ViewController>();
             enabled = false;
         }

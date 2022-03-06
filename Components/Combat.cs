@@ -57,15 +57,17 @@ namespace Components
         public float minAttackGap;
         public GameObject target;
         public GameObject attacker;
+        public float lastAttack;
         private Config curr;
         private Dictionary<string, Config> configs;
         private Animator animator;
-        private float lastAttack;
+        
 
         void Awake()
         {
             animator = GetComponent<Animator>();
             configs = new Dictionary<string, Config>();
+            lastAttack = Time.time;
         }
         public void SetWeapon(Weapon weapon)
         {
@@ -105,8 +107,16 @@ namespace Components
         public bool IsValidTarget()
         {
             if(!target) return false;
-            if(target.GetComponent<Health>().health == 0) return false;
-            if(target.transform.position.PlanerDistance(transform.position) > Constants.max_chase_distance) return false;
+            if(!target.GetComponent<Health>() || target.GetComponent<Health>().health == 0)
+            {
+                target = null;
+                return false;
+            }
+            if(target.transform.position.PlanerDistance(transform.position) > Constants.max_chase_distance)
+            {
+                target = null;
+                return false;
+            }
             return true;
         }
         public bool CanDoAttack(string conf = "")
@@ -132,9 +142,9 @@ namespace Components
         }
         public void TryDoDamage()
         {
-            transform.LookAt(target.transform);
             if(IsValidTarget())
             {
+                transform.LookAt(target.transform);
                 if(curr.isProjectile) InitProjectile();
                 else if(CanHitTarget()) DoDamage();
             } 
@@ -143,13 +153,14 @@ namespace Components
         void InitProjectile()
         {
             GameObject go = Instantiate(curr.projectilePrefab, curr.shootPoint.position, curr.shootPoint.rotation);
-            Projectile projectile = go.GetComponent<Projectile>();
+            Projectile projectile = go.AddComponent<Projectile>();
             projectile.SetTarget(curr, target);
             projectile.onHitTarget += DoDamage;
         }
-        public void DoDamage(Combat.Config _conf = null)
+        public void DoDamage(Combat.Config _conf = null, GameObject _target = null)
         {
             Combat.Config conf = _conf ?? curr;
+            GameObject target = _target ?? this.target;
             if(conf.effect != null) target.GetComponent<EffectHandler>().AddEffect(conf.effect);
             target.GetComponent<EventHandler>().RaiseEvent("GetHit", gameObject, CalcDamage(conf));
         }

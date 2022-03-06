@@ -20,9 +20,9 @@ namespace Brains
             (
                 new List<BehaviourTreeNode>
                 {
+                    new GetHit<CommonAction.GetHit, CommonAction.Die>(gameObject, new CommonEvents.GetHit()),
                     new DoFunc(gameObject, "findtarget", FindTarget),
                     new IFNode(ShouldSummonScorpion, new DoAction<ACScorpionKing.Summon>(gameObject, "summon")),
-                    new GetHit<CommonAction.GetHit, CommonAction.Die>(gameObject, new CommonEvents.GetHit()),
                     new IFNode(ShouldTailAttack, new ChaseAndAttack<CommonAction.Move, ACScorpionKing.TailAttack>(gameObject, "tailattack", 15, "tailattack")),
                     new ChaseAndAttack<CommonAction.Move, CommonAction.Attack>(gameObject, "attack", 15, "default"),
                     new Sequence

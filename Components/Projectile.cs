@@ -9,13 +9,18 @@ namespace Components
 {
     public class Projectile : GameComponent
     {
-        public Action<Combat.Config> onHitTarget;
+        public Action<Combat.Config, GameObject> onHitTarget;
         public float flySpeed;
         public float maxFlyDistance;
         private GameObject target;
         private Vector3 spawnPos;
         private bool settarget;
         private Combat.Config conf;
+
+        void Awake()
+        {
+            GetComponent<Collider>().isTrigger = true;
+        }
         public void SetTarget(Combat.Config _conf, GameObject _target)
         {
             target = _target;
@@ -36,7 +41,7 @@ namespace Components
         void OnTriggerEnter(Collider other)
         {
             if(other.gameObject != target) return;
-            onHitTarget?.Invoke(conf);
+            onHitTarget?.Invoke(conf, target);
             Finish();
         }
         void Finish()

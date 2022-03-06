@@ -24,7 +24,6 @@ namespace Actions
             protected Coroutine current;
             protected void Init()
             {
-                animator = GetComponent<Animator>();
                 combat = GetComponent<Combat>();
             }
         
@@ -62,7 +61,7 @@ namespace Actions
             {
                 AnimatorController ac = (AnimatorController)animator.runtimeAnimatorController;
                 AnimatorState state = ac.GetAnimatorState(0, attackAnimStr);
-                if(state)
+                if(state && state.motion)
                 {
                     AnimationClip clip = animator.GetAnimationClip(state.motion.name);
                     if(clip)
