@@ -176,5 +176,18 @@ namespace Events.Player
                 actionController.DoAction<UnEquipController>(args);
             }
         }
+        public class Construct : PlayerEvent
+        {
+            public override string name
+            {
+                get => "Construct";
+            }
+
+            public override void fn(GameObject gameObject, params object[] args)
+            {
+                ActionController actionController = gameObject.GetComponent<ActionController>();
+                actionController.DoAction<ConstructionController>(args);
+            }
+        }
     }
 }

@@ -48,7 +48,7 @@ public class MapManager : ManagerSingleton<MapManager>
 {
     public bool debug;
     public GameObject visualizedMapQuad;
-    bool[,] mapGridsState = new bool[40, 40];
+    bool[,] mapGridsState = new bool[100, 100];
     void Awake()
     {
         Application.targetFrameRate = 60;

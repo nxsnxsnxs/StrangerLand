@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Player;
+using UI;
 
 namespace Components
 {
@@ -36,13 +37,13 @@ namespace Components
             if(inInspectMode) return;
             inInspectMode = true;
             GetComponent<MeshRenderer>().material = rimLightMat;
-            UIManager.Instance.inspectWindow.InitInspect(this);
+            PanelManager.Instance.Open<InspectPanel>("InspectPanel", this);
         }
         void StopInspect()
         {
             inInspectMode = false;
             GetComponent<MeshRenderer>().material = originalMat;
-            UIManager.Instance.inspectWindow.StopInspect();
+            PanelManager.Instance.Close("InspectPanel");
         }
     }
 }

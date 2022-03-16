@@ -5,9 +5,6 @@ using Tools;
 using Prefabs;
 using Components;
 using UI;
-using Player.UI;
-using Actions;
-using Player.Actions;
 using Events;
 
 namespace Player
@@ -37,29 +34,28 @@ namespace Player
         public Transform hand;
         public Transform head;
         public Transform body;
-        public Transform itemContainer;
+        private Transform itemContainer;
         private Dictionary<EquipSlotType, Transform> equipmentContainer;
 
         //UI Panel
-        public Transform inventoryPanel;
-        public Transform dragPanel;
+        public InventoryPanel inventoryPanel;
         //装备栏对应的ui
         public EquipmentSlot handSlot
         {
-            get => equipmentSlots[EquipSlotType.Hand];
+            get => equipmentSlots[(int)EquipSlotType.Hand];
         }
         public EquipmentSlot bodySlot
         {
-            get => equipmentSlots[EquipSlotType.Body];
+            get => equipmentSlots[(int)EquipSlotType.Body];
         }
         public EquipmentSlot headSlot
         {
-            get => equipmentSlots[EquipSlotType.Head];
+            get => equipmentSlots[(int)EquipSlotType.Head];
         }
-        private Dictionary<EquipSlotType, EquipmentSlot> equipmentSlots;
-        //物品栏和装备栏的父物体
-        private Transform inventorySlotsContainer;
-        private Transform equipmentSlotsContainer;
+        public List<EquipmentSlot> equipmentSlots
+        {
+            get => inventoryPanel.equipmentSlots;
+        }
         private class PersistentData
         {
             public List<int> itemData;
@@ -70,26 +66,20 @@ namespace Player
         {
             animator = GetComponent<Animator>();
             eventHandler = GetComponent<EventHandler>();
+            inventoryPanel = PanelManager.Instance.Open<InventoryPanel>("InventoryPanel", this, 8);
 
-            inventorySlotsContainer = inventoryPanel.transform.Find("Inventory Slots");
-            equipmentSlotsContainer = inventoryPanel.transform.Find("Equipment Slots");
             //初始化背包物品栏
-            inventoryItems = new Dictionary<ItemSlot, InventoryItem>();
-            foreach (var slot in inventorySlotsContainer.GetComponentsInChildren<ItemSlot>())
+            inventoryItems = new Dictionary<ItemSlot, InventoryItem>(6);
+            foreach (var slot in inventoryPanel.itemSlots)
             {
                 inventoryItems[slot] = null;
             }
-            //初始化装备栏
-            equipmentSlots = new Dictionary<EquipSlotType, EquipmentSlot>();
-            equipmentSlots[EquipSlotType.Hand] = equipmentSlotsContainer.Find("Hand Slot").GetComponent<EquipmentSlot>();
-            equipmentSlots[EquipSlotType.Body] = equipmentSlotsContainer.Find("Body Slot").GetComponent<EquipmentSlot>();
-            equipmentSlots[EquipSlotType.Head] = equipmentSlotsContainer.Find("Head Slot").GetComponent<EquipmentSlot>();
-            
             equipments = new Dictionary<EquipmentSlot, InventoryItem>();
             equipments[handSlot] = null;
             equipments[bodySlot] = null;
             equipments[headSlot] = null;
-
+            //初始化背包hierarchy
+            itemContainer = transform.Find("Inventory");
             equipmentContainer = new Dictionary<EquipSlotType, Transform>();
             equipmentContainer[EquipSlotType.Hand] = hand;
             equipmentContainer[EquipSlotType.Body] = hand;
@@ -100,15 +90,11 @@ namespace Player
         {
             ArchiveManager.Instance.RegisterSave(GetInstanceID(), this);
         }
-        void FixedUpdate()
-        {
-            
-        }
         public bool AddItem(InventoryItem item)
         {
             if(item == null)
             {
-                Debug.Log("error");
+                Debug.LogError("Fail to add inventory item");
                 return false;
             }
             bool result = AddItemPhysically(item);
@@ -118,7 +104,7 @@ namespace Player
         private bool AddItemPhysically(InventoryItem item)
         {
             if(item.GetComponent<Equipable>() != null) return AddEquipmentItem(item);
-            else return AddNormalItem(item);            
+            else return AddNormalItem(item);
         }
         //添加物品到物品栏
         private bool AddNormalItem(InventoryItem item)
@@ -159,7 +145,7 @@ namespace Player
         private bool AddEquipmentItem(InventoryItem item)
         {
             Equipable equipable = item.GetComponent<Equipable>();
-            if(!equipments[equipmentSlots[equipable.equipSlotType]])
+            if(!equipments[inventoryPanel.equipmentSlots[(int)equipable.equipSlotType]])
             {
                 EquipItem(item);
                 return true;
@@ -170,7 +156,7 @@ namespace Player
         private void EquipItem(InventoryItem item)
         {
             Equipable equipable = item.GetComponent<Equipable>();
-            equipments[equipmentSlots[equipable.equipSlotType]] = item;
+            equipments[equipmentSlots[(int)equipable.equipSlotType]] = item;
             equipable.Equip(equipmentContainer[equipable.equipSlotType]);
             if(equipable.GetComponent<Weapon>()) GetComponent<Combat>().SetWeapon(equipable.GetComponent<Weapon>());
             item.gameObject.SetActive(true);
@@ -225,30 +211,21 @@ namespace Player
             inventoryItems[dst] = temp;
             UpdateUI();
         }
-        public void InspectItem(ItemSlot slot)
+        public InventoryItem GetItem(ItemSlot slot)
         {
-            InventoryItem item = inventoryItems[slot];
-            if(!item) return;
-            Inspectable inspectable = item.GetComponent<Inspectable>();
-            if(!inspectable) return;
-            UIManager.Instance.inspectWindow.InitInspect(inspectable);
+            if(inventoryItems.ContainsKey(slot)) return inventoryItems[slot];
+            return null;
         }
-        public void InspectItem(EquipmentSlot slot)
+        public InventoryItem GetEquipment(EquipmentSlot slot)
         {
-            InventoryItem item = equipments[slot];
-            if(!item) return;
-            Inspectable inspectable = item.GetComponent<Inspectable>();
-            if(!inspectable) return;
-            UIManager.Instance.inspectWindow.InitInspect(inspectable);
+            if(equipments.ContainsKey(slot)) return equipments[slot];
+            return null;
         }
-        public void StopInspectItem()
-        {
-            if(UIManager.Instance.inspectWindow.current) UIManager.Instance.inspectWindow.StopInspect();
-        }
+
+
         //Inventory UI call action
-        
         //Left Click Item
-        public void UseItem(ItemSlot slot)
+        public void TryUseItem(ItemSlot slot)
         {
             InventoryItem item = inventoryItems[slot];
             if(!item) return;
@@ -257,10 +234,10 @@ namespace Player
             {
                 Equipable equipable = item.GetComponent<Equipable>();
                 //已有装备在槽位上，先卸下装备
-                if(equipments[equipmentSlots[equipable.equipSlotType]])
+                if(equipments[equipmentSlots[(int)equipable.equipSlotType]])
                 {
                     //先装备物品，后将之前的装备移至物品栏以防背包满的情况
-                    InventoryItem originalEq = equipments[equipmentSlots[equipable.equipSlotType]];
+                    InventoryItem originalEq = equipments[equipmentSlots[(int)equipable.equipSlotType]];
                     EquipItem(item);
                     inventoryItems[slot] = null;
                     AddNormalItem(originalEq);
@@ -277,6 +254,16 @@ namespace Player
             }
             UpdateUI();
         }
+        //Left Click Equipment
+        public void TryUseEquipment(EquipmentSlot slot)
+        {
+            if(!equipments[slot])
+            {
+                Debug.LogError("no drop item");
+                return;
+            }
+            if(!equipments[slot].GetComponent<Usable>()) return;
+        }        
         //Right Click Item
         public void TryDropItem(ItemSlot slot)
         {
@@ -297,17 +284,6 @@ namespace Player
         public void DropFinish()
         {
             if(handEquipment) handEquipment.gameObject.SetActive(true);
-        }
-        //Left Click Equipment
-        public void TryUseEquipment(EquipmentSlot slot)
-        {
-            if(!equipments[slot])
-            {
-                Debug.LogError("no drop item");
-                return;
-            }
-            if(!equipments[slot].GetComponent<Usable>()) return;
-            
         }
         //RightClickEquipment
         public void TryUnEquipItem(EquipmentSlot slot)

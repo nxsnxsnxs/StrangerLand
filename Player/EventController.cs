@@ -35,6 +35,7 @@ namespace Player
             AddEvent<PlayerEvents.GetHit>();
             AddEvent<PlayerEvents.Drop>();
             AddEvent<PlayerEvents.UnEquip>();
+            AddEvent<PlayerEvents.Construct>();
         }
         void AddEvent<T>() where T : PlayerEvent, new()
         {

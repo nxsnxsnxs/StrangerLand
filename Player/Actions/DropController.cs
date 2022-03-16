@@ -2,7 +2,7 @@ using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Player.UI;
+using UI;
 using Actions;
 
 namespace Player.Actions

@@ -10,7 +10,6 @@ namespace UI
 {
     public class InspectWindow : MonoBehaviour
     {
-        public Vector2 minWindow;
         [HideInInspector]public Inspectable current;
         Text inspectText;
         RectTransform rectTransform;
