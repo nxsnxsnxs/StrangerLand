@@ -66,11 +66,25 @@ namespace Events.Player
                 }
             }
         }
-        public class Pick : PlayerEvent
+        public class Pickup : PlayerEvent
         {
             public override string name
             {
-                get => "Pick";
+                get => "Pickup";
+            }
+            //params:
+            //target
+            public override void fn(GameObject gameObject, params object[] args)
+            {
+                ActionController actionController = gameObject.GetComponent<ActionController>();
+                actionController.DoAction<CraftController>(args);
+            }
+        }
+        public class Harvest : PlayerEvent
+        {
+            public override string name
+            {
+                get => "Harvest";
             }
             //params:
             //target

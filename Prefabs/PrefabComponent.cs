@@ -27,6 +27,10 @@ namespace Prefabs
             public float pitch;
             public float yaw;
             public float roll;
+            //size
+            public float xsize;
+            public float ysize;
+            public float zsize;
             //AssetName(AssetBundle)
             public string loadPath;
             //all data of gamecomponents it have
@@ -35,21 +39,17 @@ namespace Prefabs
             {
                 GameObject target = ABManager.Instance.LoadAsset<GameObject>("Prefab", loadPath);
                 GameObject go = GameObject.Instantiate(target, new Vector3(x, y, z), Quaternion.Euler(pitch, yaw, roll));
+                go.transform.localScale = new Vector3(xsize, ysize, zsize);
                 PrefabComponent pc = go.GetComponent<PrefabComponent>();
-                pc.Init(componentData);
+                pc.InitComponentsData(componentData);
             }
         }
         public abstract string bundleName {get;}
         private GameTag gameTag;
-        public void Init(Dictionary<string, object> componentData)
-        {
-            DefaultInit();
-            if(componentData != null) InitComponentsData(componentData);
-        }
 
         void Awake()
         {
-            Init(null);
+            DefaultInit();
         }
         public void AddTag(GameTag tag)
         {
@@ -69,6 +69,9 @@ namespace Prefabs
             data.pitch = transform.rotation.eulerAngles.x;
             data.yaw = transform.rotation.eulerAngles.y;
             data.roll = transform.rotation.eulerAngles.z;
+            data.xsize = transform.localScale.x;
+            data.ysize = transform.localScale.y;
+            data.zsize = transform.localScale.z;
             data.loadPath = bundleName;
             foreach (var item in GetComponents<GameComponent>())
             {

@@ -50,10 +50,12 @@ namespace UI
             CreateEquipmentSlot(bodySlotSkin);
             CreateEquipmentSlot(headSlotSkin);
         }
+        //直接打开
         public override void Open()
         {
             
         }
+        //直接关闭
         public override void Close()
         {
             
@@ -86,7 +88,7 @@ namespace UI
             if(slot is ItemSlot) item = inventoryController.GetItem(slot as ItemSlot);
             else if(slot is EquipmentSlot) item = inventoryController.GetEquipment(slot as EquipmentSlot);
             else return;
-            if(!item.GetComponent<Inspectable>()) return;
+            if(!item || !item.GetComponent<Inspectable>()) return;
             PanelManager.Instance.Open<InspectPanel>("InspectPanel", item.GetComponent<Inspectable>());
         }
         public void StopHoverSlot()

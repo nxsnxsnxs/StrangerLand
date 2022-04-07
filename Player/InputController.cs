@@ -43,9 +43,14 @@ namespace Player
                 {
                     if(Input.GetMouseButtonDown(0)) eventHandler.RaiseEvent("Attack", raycastHit.collider.GetComponentInParent<Combat>());
                 }
-                else if(raycastHit.collider.GetComponentInParent<Pickable>())
+                else if(raycastHit.collider.GetComponentInParent<Pickupable>())
                 {
-                    if(Input.GetMouseButtonDown(0)) eventHandler.RaiseEvent("Pick", raycastHit.collider.GetComponentInParent<Pickable>());
+                    if(Input.GetMouseButtonDown(0)) eventHandler.RaiseEvent("Pickup", raycastHit.collider.GetComponentInParent<Pickupable>());
+                }
+                else if(raycastHit.collider.GetComponentInParent<Harvestable>())
+                {
+                    Harvestable harvestable = raycastHit.collider.GetComponentInParent<Harvestable>();
+                    if(harvestable.CanHarvest() && Input.GetMouseButtonDown(0)) eventHandler.RaiseEvent("Harvest", raycastHit.collider.GetComponentInParent<Harvestable>());
                 }
                 else if(raycastHit.collider.GetComponentInParent<Workable>())
                 {

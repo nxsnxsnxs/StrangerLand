@@ -82,6 +82,16 @@ public class MapManager : ManagerSingleton<MapManager>
             }
         }
     }
+    public void UnRegisterBuildingLand(Vector3 center, float length, float width)
+    {
+        for(int i = ToolMethod.EightTwoRoundToInt(center.x - length / 2); i < ToolMethod.TwoEightRoundToInt(center.x + length / 2); ++i)
+        {
+            for(int j = ToolMethod.EightTwoRoundToInt(center.z - width / 2); j < ToolMethod.TwoEightRoundToInt(center.z + width / 2); ++j)
+            {
+                ResetCoveredPos(i, j);
+            }
+        }
+    }
     public bool CanStand(Vector3 pos, Collider coll)
     {
         return CanStand(pos, Mathf.Max(coll.bounds.size.x, coll.bounds.size.z) / 2);
@@ -113,6 +123,14 @@ public class MapManager : ManagerSingleton<MapManager>
         int j = z + mapGridsState.GetLength(0) / 2;
         if(i < 0 || j < 0 || i >= mapGridsState.GetLength(0) || j >= mapGridsState.GetLength(1)) return;
         mapGridsState[i, j] = true;
+        //Debug.Log(String.Format("i:{0},j:{1}", i, j));
+    }
+    private void ResetCoveredPos(int x, int z)
+    {
+        int i = x + mapGridsState.GetLength(1) / 2;
+        int j = z + mapGridsState.GetLength(0) / 2;
+        if(i < 0 || j < 0 || i >= mapGridsState.GetLength(0) || j >= mapGridsState.GetLength(1)) return;
+        mapGridsState[i, j] = false;
         //Debug.Log(String.Format("i:{0},j:{1}", i, j));
     }
     private bool GetGridState(int x, int z)

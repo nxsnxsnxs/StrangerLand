@@ -7,6 +7,7 @@ public class Constants
     //common
     public const float deadbody_disappear_time = 3f;
     public const float max_chase_distance = 15f;
+    public const int normal_inventory_maxstack = 20;
     //projectile fly speed
     public const float slow_projectile_fly_speed = 7.5f;
     public const float normal_projectile_fly_speed = 9.5f;
@@ -14,9 +15,8 @@ public class Constants
     //projectile fly maxdistance
     public const float normal_projectile_fly_maxdistance = 14;
     //attack duration
-    public const float normal_attack_duration = 1.6f;
-    public const float tool_attack_duration = 1.4f;
     public const float hand_attack_duration = 1.8f;
+    public const float tool_attack_duration = 1.4f;
     public const float sword_attack_duration = 0.7f;
     //attack cd
     public const float normal_min_attack_gap = 1;
@@ -53,6 +53,9 @@ public class Constants
     //player
     public const float player_move_speed = 5;
     public const int maleknight_max_health = 100;
+    //maxwork
+    public const int rock_maxwork = 8;
+
     //golem
     public const int golem_health = 60;
     public const float golem_move_speed = 2.5f;

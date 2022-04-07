@@ -15,8 +15,6 @@ namespace Prefabs
 
         public override void DefaultInit()
         {
-            Pickable pickable = gameObject.AddGameComponent<Pickable>();
-            pickable.type = PickType.Harvest;
             Workable workable = gameObject.AddGameComponent<Workable>();
             workable.toolType = WorkToolType.Axe;
         }

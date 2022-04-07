@@ -39,30 +39,29 @@ namespace Player.Actions
         {
             if(target.Length == 0) AutoDoCraft();
             else if(target[0] is Workable) current = StartCoroutine(DoWork(target[0] as Workable));
-            else if(target[0] is Pickable) current = StartCoroutine(DoPick(target[0] as Pickable));
+            else if(target[0] is Pickupable) current = StartCoroutine(DoPickup(target[0] as Pickupable));
+            else if(target[0] is Harvestable) current = StartCoroutine(DoHarvest(target[0] as Harvestable));
         }
+        //选择最近的一个可执行目标
         void AutoDoCraft()
         {
-            Pickable pickTarget = transform.position.FindClosestTargetInRange<Pickable>(Constants.try_craft_distance);
+            Pickupable pickupTarget = transform.position.FindClosestTargetInRange<Pickupable>(Constants.try_craft_distance);
+            Harvestable harvestTarget = transform.position.FindClosestTargetInRange<Harvestable>(Constants.try_craft_distance);
+            Workable workTarget = null;
             if(inventoryController.handEquipment != null && inventoryController.handEquipment.GetComponent<Tool>() != null)
             {
-                Workable workTarget = transform.position.FindClosestTargetInRange<Workable>(Constants.try_craft_distance, 
+                workTarget = transform.position.FindClosestTargetInRange<Workable>(Constants.try_craft_distance, 
                     (w) => { return inventoryController.handEquipment.GetComponent<Tool>().toolTypes.Contains(w.toolType); });
-                //同一个物体包含Workable和Pickable，优先Workable，其余情况按照就近原则
-                if(workTarget != null)
-                {
-                    if(pickTarget != null)
-                    {
-                        if(workTarget.gameObject == pickTarget.gameObject) current = StartCoroutine(DoWork(workTarget));
-                        else if(transform.position.PlanerDistance(pickTarget.transform.position) < 
-                            transform.position.PlanerDistance(workTarget.transform.position)) current = StartCoroutine(DoPick(pickTarget));
-                        else current = StartCoroutine(DoWork(workTarget));
-                    }
-                    else current = StartCoroutine(DoWork(workTarget));
-                    return;
-                }
             }
-            if(pickTarget != null) current = StartCoroutine(DoPick(pickTarget));
+            if(!workTarget && !harvestTarget && !workTarget) return;
+
+            float pickupDis = pickupTarget ? transform.position.PlanerDistance(pickupTarget.transform.position) : float.MaxValue;
+            float workDis = workTarget ? workTarget.GetComponent<Collider>().ClosestPointOnBounds(transform.position).PlanerDistance(transform.position) : float.MaxValue;
+            float harvestDis = harvestTarget ? harvestTarget.GetComponent<Collider>().ClosestPointOnBounds(transform.position).PlanerDistance(transform.position) : float.MaxValue;
+            
+            if(harvestDis <= pickupDis && harvestDis <= workDis) current = StartCoroutine(DoHarvest(harvestTarget));
+            else if(workDis <= harvestDis && workDis <= pickupDis) current = StartCoroutine(DoWork(workTarget));
+            else current = StartCoroutine(DoPickup(pickupTarget));
         }
         IEnumerator MoveToTarget(GameObject target)
         {
@@ -90,10 +89,10 @@ namespace Player.Actions
             yield return MoveToTarget(target.gameObject);
             animator.SetTrigger("Work");
             while(!triggers["workfinish"]) yield return null;
-            target.OnWork(gameObject);
+            target.Work(gameObject, 1);
             finish = true;
         }
-        IEnumerator DoPick(Pickable target)
+        IEnumerator DoPickup(Pickupable target)
         {
             yield return MoveToTarget(target.gameObject);
             //隐藏手部工具
@@ -102,22 +101,43 @@ namespace Player.Actions
                 inventoryController.handEquipment.gameObject.SetActive(false);
             }
 
-            if(target.type == PickType.Pickup)
+            animator.SetTrigger("Pickup");
+            while(!triggers["pickup"]) yield return null;
+            if(!inventoryController.AddItem(target.Pickup()))
             {
-                animator.SetTrigger("Pickup");
-                while(!triggers["pickup"]) yield return null;
-                inventoryController.AddItem(target.Pick());
-                while(!triggers["pickfinish"]) yield return null;
-                if(inventoryController.handEquipment) inventoryController.handEquipment.gameObject.SetActive(true);
+                //TODO:背包已满拾取失败,播放失败音效
             }
-            else
-            {
-                animator.SetTrigger("Harvest");
-                yield return StartCoroutine(HarvestTimer(target.harvestTime));
-                inventoryController.AddItem(target.Pick());
-                if(inventoryController.handEquipment) inventoryController.handEquipment.gameObject.SetActive(true);
-            }
+            while(!triggers["pickfinish"]) yield return null;
+            if(inventoryController.handEquipment) inventoryController.handEquipment.gameObject.SetActive(true);
+
             finish = true;      
+        }
+        IEnumerator DoHarvest(Harvestable target)
+        {
+            yield return MoveToTarget(target.gameObject);
+            //隐藏手部工具
+            inventoryController.HideHandItem();
+            if(!target.CanHarvest())
+            {
+                finish = true;
+                inventoryController.ShowHandItem();
+                yield break;
+            }
+            animator.SetTrigger("Harvest");
+            yield return StartCoroutine(HarvestTimer(target.harvestTime));
+            if(!target.CanHarvest())
+            {
+                finish = true;
+                inventoryController.ShowHandItem();
+                yield break;
+            }
+            foreach (var item in target.Harvest())
+            {
+                inventoryController.AddItem(item);
+            }
+            
+            inventoryController.ShowHandItem();
+            finish = true; 
         }
         IEnumerator HarvestTimer(float timer)
         {

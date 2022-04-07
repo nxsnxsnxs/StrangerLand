@@ -9,7 +9,6 @@ namespace Components
         //********need set************
         public int count;
         public int maxCount;
-        public MonoBehaviour owner;
         //***************************
     }
 }

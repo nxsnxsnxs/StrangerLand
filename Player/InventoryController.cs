@@ -11,8 +11,10 @@ namespace Player
 {
     public class InventoryController : MonoBehaviour, IArchiveSave
     {
-        public RuntimeAnimatorController handAnim;
+        public int itemCapacity = 8;
+
         private Animator animator;
+        private RuntimeAnimatorController handAnim;
         private EventHandler eventHandler;
 
         //背包中每个格子实际对应的物品
@@ -31,14 +33,14 @@ namespace Player
         private Dictionary<ItemSlot, InventoryItem> inventoryItems;
         private Dictionary<EquipmentSlot, InventoryItem> equipments;
         //背包中每个格子对应物品的实际存放处
-        public Transform hand;
-        public Transform head;
-        public Transform body;
+        private Transform hand;
+        private Transform head;
+        private Transform body;
         private Transform itemContainer;
         private Dictionary<EquipSlotType, Transform> equipmentContainer;
 
         //UI Panel
-        public InventoryPanel inventoryPanel;
+        private InventoryPanel inventoryPanel;
         //装备栏对应的ui
         public EquipmentSlot handSlot
         {
@@ -65,11 +67,12 @@ namespace Player
         void Awake()
         {
             animator = GetComponent<Animator>();
+            handAnim = ABManager.Instance.LoadAsset<RuntimeAnimatorController>("PlayerCommon", "Animator");
             eventHandler = GetComponent<EventHandler>();
-            inventoryPanel = PanelManager.Instance.Open<InventoryPanel>("InventoryPanel", this, 8);
+            inventoryPanel = PanelManager.Instance.Open<InventoryPanel>("InventoryPanel", this, itemCapacity);
 
             //初始化背包物品栏
-            inventoryItems = new Dictionary<ItemSlot, InventoryItem>(6);
+            inventoryItems = new Dictionary<ItemSlot, InventoryItem>(itemCapacity);
             foreach (var slot in inventoryPanel.itemSlots)
             {
                 inventoryItems[slot] = null;
@@ -113,9 +116,10 @@ namespace Player
             if(item.GetComponent<Stackable>())
             {
                 Stackable stackable = item.GetComponent<Stackable>();
+                //尝试与背包中相同类型的物品堆叠
                 foreach (var slot in inventoryItems.Keys)
                 {
-                    if(inventoryItems[slot] && inventoryItems[slot].GetComponent(stackable.owner.GetType()))
+                    if(inventoryItems[slot] && inventoryItems[slot].GetComponent<PrefabComponent>().GetType() == stackable.GetComponent<PrefabComponent>().GetType())
                     {
                         Stackable oldStackable = inventoryItems[slot].GetComponent<Stackable>();
                         int remainSpace = oldStackable.maxCount - oldStackable.count;
@@ -162,7 +166,7 @@ namespace Player
             item.gameObject.SetActive(true);
             item.GetComponent<Rigidbody>().isKinematic = true;
             item.GetComponent<Collider>().enabled = false;
-            item.GetComponent<Pickable>().enabled = false;
+            Destroy(item.GetComponent<Pickupable>());
             //if(equipable.overrideAnimator) ReplaceAnimator(equipable.overrideAnimator.runtimeAnimatorController);
             animator.runtimeAnimatorController = equipable.overrideAnimator;
         }
@@ -173,7 +177,7 @@ namespace Player
             animator.runtimeAnimatorController = newAnimator;
             
         }
-        //保留物品用于之后的操作
+        //保留物品用于之后的操作(物理)
         private void SaveItem(InventoryItem item)
         {
             item.transform.SetParent(itemContainer);
@@ -181,16 +185,16 @@ namespace Player
             item.gameObject.SetActive(false);
             item.GetComponent<Rigidbody>().isKinematic = true;
             item.GetComponent<Collider>().enabled = false;
-            item.GetComponent<Pickable>().enabled = false;
+            Destroy(item.GetComponent<Pickupable>());
         }
-        //丢弃物品
+        //丢弃物品(物理)
         private void FreeItem(InventoryItem item)
         {
             item.transform.SetParent(null);
             item.gameObject.SetActive(true);
             item.GetComponent<Rigidbody>().isKinematic = false;
             item.GetComponent<Collider>().enabled = true;
-            item.GetComponent<Pickable>().enabled = true;
+            item.gameObject.AddGameComponent<Pickupable>();
         }
         public void UpdateUI()
         {
@@ -313,7 +317,16 @@ namespace Player
             animator.runtimeAnimatorController = handAnim;
             UpdateUI();
         }
-
+        public void HideHandItem()
+        {
+            if(!handEquipment) return;
+            handEquipment.gameObject.SetActive(false);
+        }
+        public void ShowHandItem()
+        {
+            if(!handEquipment) return;
+            handEquipment.gameObject.SetActive(true);
+        }
         public string GetPersistentData()
         {
             PersistentData data = new PersistentData();

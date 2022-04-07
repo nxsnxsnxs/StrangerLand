@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 namespace Components
 {
-    [System.Serializable]
     public class InventoryItem : GameComponent
     {
         //********need set************

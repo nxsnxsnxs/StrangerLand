@@ -29,7 +29,8 @@ namespace Player
             AddEvent<PlayerEvents.Move>();
             AddEvent<PlayerEvents.AutoCraft>();
             AddEvent<PlayerEvents.Work>();
-            AddEvent<PlayerEvents.Pick>();
+            AddEvent<PlayerEvents.Pickup>();
+            AddEvent<PlayerEvents.Harvest>();
             AddEvent<PlayerEvents.AutoAttack>();
             AddEvent<PlayerEvents.Attack>();
             AddEvent<PlayerEvents.GetHit>();

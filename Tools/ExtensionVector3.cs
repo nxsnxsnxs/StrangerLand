@@ -18,7 +18,7 @@ namespace Tools
         public static T FindClosestTargetInRange<T>(this Vector3 position, float maxDistance, Predicate<T> filter = null, bool includeInactive = false, T self = null) where T : MonoBehaviour
         {
             if(filter == null) filter = (_) => { return true; };
-            List<T> targets = ToolMethod.FindObjectsWithComponent<T>(includeInactive);
+            T[] targets = GameObject.FindObjectsOfType<T>(includeInactive);
             T closestTarget = null;
             float minDistance = float.MaxValue;
             foreach (var item in targets)

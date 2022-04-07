@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,7 @@ using Tools;
 
 namespace Components
 {
+    using EventHandler = Events.EventHandler;
     public enum WorkToolType
     {
         Axe, Pickaxe, Shovel
@@ -16,17 +18,14 @@ namespace Components
         public WorkToolType toolType;
         public int maxWork;
         public int currWork;
+        public Action<Workable, GameObject> onWork;
+        public Action<Workable, GameObject> onWorkExhausted;
         //***************************
-        public void OnWork(GameObject worker)
+        public void Work(GameObject worker, int workVal)
         {
-            List<EventHandler> listeners = transform.position.FindObjectsOfTypeInRange<EventHandler>(15);
-            if(listeners != null)
-            {
-                foreach (var item in listeners)
-                {
-                    item.RaiseEvent("hasmineraround", worker);
-                }
-            }
+            currWork -= workVal;
+            onWork?.Invoke(this, worker);
+            if(currWork <= 0) onWorkExhausted?.Invoke(this, worker);
         }
     }
 }

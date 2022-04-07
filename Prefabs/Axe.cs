@@ -24,8 +24,7 @@ namespace Prefabs
             axeAnimator = ABManager.Instance.LoadAsset<AnimatorOverrideController>(bundleName, "OverrideAnim");
             inventoryIcon = ABManager.Instance.LoadAsset<Sprite>(bundleName, "InventoryIcon");
             
-            Pickable pickable = gameObject.AddGameComponent<Pickable>();
-            pickable.type = PickType.Pickup;
+            Pickupable pickable = gameObject.AddGameComponent<Pickupable>();
             InventoryItem inventoryItem = gameObject.AddGameComponent<InventoryItem>();
             inventoryItem.icon = inventoryIcon;
             Weapon weapon = gameObject.AddGameComponent<Weapon>();

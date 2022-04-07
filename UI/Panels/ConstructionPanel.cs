@@ -32,7 +32,8 @@ namespace UI
             foreach (var buildingStats in ConstructionManager.Instance.BuildingList)
             {
                 GameObject bp = Instantiate(buildingCellSkin, buildingCatalogue);
-                bp.GetComponent<BuildingCell>().Init(buildingStats);
+                BuildingCell cell = bp.AddComponent<BuildingCell>();
+                cell.Init(buildingStats);
             }
         }
         void Start()
