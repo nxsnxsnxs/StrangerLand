@@ -62,7 +62,7 @@ namespace Player.Actions
             Vector3 dst;
             if(coll) dst = coll.ClosestPointOnBounds(viewController.model.transform.position);
             else dst = target.transform.position;
-            if(transform.position.PlanerDistance(dst) > Constants.construct_distance) GetComponent<Locomotor>().StartMove(target.gameObject);
+            if(transform.position.PlanerDistance(dst) > Constants.construct_distance) GetComponent<Locomotor>().StartMove(target.gameObject.transform.position);
             while(transform.position.PlanerDistance(dst) > Constants.construct_distance) yield return null;
             animator.SetTrigger("Construct");
             yield return new WaitForSeconds(Constants.normal_construct_time);

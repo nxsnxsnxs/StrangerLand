@@ -112,7 +112,6 @@ namespace Player.Construction
             building.GetComponent<Collider>().isTrigger = false;
             transform.DetachChildren();
             info.center = GridPos.GetGridPos(transform.position);
-            MapManager.Instance.RegisterBuildingLand(building.GetComponent<Collider>());
             preBuildFinishCallback?.Invoke(true);
             Destroy(gameObject);
         }

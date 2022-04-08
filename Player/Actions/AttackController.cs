@@ -63,7 +63,7 @@ namespace Player.Actions
             Vector3 attackTargetLastPos = combat.target.transform.position;
             Vector3 newPos = attackTargetLastPos;
             animator.SetInteger("MoveState", 1);
-            GetComponent<Locomotor>().StartMove(combat.target);
+            GetComponent<Locomotor>().StartMove(combat.target.transform.position);
             
             while(!combat.CanAttackTarget())
             {
@@ -77,7 +77,7 @@ namespace Player.Actions
                 newPos = combat.target.transform.position;
                 if(newPos.PlanerDistance(attackTargetLastPos) > 0.8f)
                 {
-                    GetComponent<Locomotor>().RenewMove(combat.target);
+                    GetComponent<Locomotor>().RenewMove(combat.target.transform.position);
                     attackTargetLastPos = newPos;
                 }
             }
